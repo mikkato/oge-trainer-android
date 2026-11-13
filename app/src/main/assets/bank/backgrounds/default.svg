@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1115"/>
+      <stop offset="1" stop-color="#151b29"/>
+    </linearGradient>
+    <filter id="b" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g filter="url(#b)">
+<text x="1300" y="793" font-size="39" fill="#4e6d8f" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(9 1300 793)">E = mc²</text>
+<text x="810" y="256" font-size="51" fill="#7a6f9e" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-4 810 256)">x² + y² = r²</text>
+<text x="859" y="944" font-size="75" fill="#6a6f9e" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-26 859 944)">∫ x dx</text>
+<text x="1128" y="503" font-size="35" fill="#626b8a" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(25 1128 503)">√2</text>
+<text x="362" y="359" font-size="30" fill="#4e6d8f" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(10 362 359)">π</text>
+<text x="1169" y="398" font-size="69" fill="#626b8a" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-26 1169 398)">∑</text>
+<text x="77" y="591" font-size="29" fill="#6b7280" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(21 77 591)">∞</text>
+<text x="1363" y="686" font-size="81" fill="#4f7d8f" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(18 1363 686)">Δ</text>
+<text x="566" y="75" font-size="37" fill="#6b7280" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-28 566 75)">F = ma</text>
+<text x="725" y="329" font-size="30" fill="#4e6d8f" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(24 725 329)">sin²α + cos²α = 1</text>
+<text x="84" y="794" font-size="40" fill="#4e6d8f" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(32 84 794)">≈</text>
+<text x="868" y="905" font-size="66" fill="#4f7d8f" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-25 868 905)">≠</text>
+<text x="455" y="824" font-size="63" fill="#4e6d8f" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-29 455 824)">→</text>
+<text x="467" y="835" font-size="50" fill="#5a6f9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(26 467 835)">±</text>
+<text x="1242" y="798" font-size="23" fill="#4f7d8f" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-22 1242 798)">∂f/∂x</text>
+<text x="1363" y="143" font-size="39" fill="#6a6f9e" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-26 1363 143)">S = πr²</text>
+<text x="1437" y="463" font-size="70" fill="#7a6f9e" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-22 1437 463)">U = IR</text>
+<text x="1255" y="881" font-size="72" fill="#626b8a" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-10 1255 881)">φ</text>
+<text x="728" y="810" font-size="78" fill="#6a6f9e" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(29 728 810)">λ</text>
+<text x="1411" y="262" font-size="34" fill="#5f7d7a" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(22 1411 262)">Ж</text>
+<text x="1036" y="343" font-size="59" fill="#5b7a9e" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-29 1036 343)">Ы</text>
+<text x="65" y="425" font-size="43" fill="#557a8a" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-10 65 425)">приставка</text>
+  </g>
+</svg>

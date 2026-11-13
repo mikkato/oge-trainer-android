@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1115"/>
+      <stop offset="1" stop-color="#1b1426"/>
+    </linearGradient>
+    <filter id="b" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g filter="url(#b)">
+<text x="42" y="342" font-size="51" fill="#557a8a" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-9 42 342)">E = mc²</text>
+<text x="710" y="704" font-size="69" fill="#6b7280" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-19 710 704)">F = ma</text>
+<text x="639" y="273" font-size="33" fill="#6b7280" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(9 639 273)">U = IR</text>
+<text x="1447" y="691" font-size="22" fill="#5a6f9e" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-20 1447 691)">P = UI</text>
+<text x="387" y="176" font-size="26" fill="#557a8a" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(12 387 176)">v = s/t</text>
+<text x="1177" y="352" font-size="77" fill="#4f7d8f" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(16 1177 352)">a = Δv/Δt</text>
+<text x="246" y="890" font-size="32" fill="#5b7a9e" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(5 246 890)">F = G·m₁m₂/r²</text>
+<text x="903" y="790" font-size="30" fill="#5b7a9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-2 903 790)">E = hν</text>
+<text x="1107" y="167" font-size="84" fill="#557a8a" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-9 1107 167)">λ = h/p</text>
+<text x="1188" y="508" font-size="27" fill="#557a8a" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(20 1188 508)">p = mv</text>
+<text x="354" y="641" font-size="78" fill="#7a6f9e" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-29 354 641)">W = Fs</text>
+<text x="452" y="658" font-size="74" fill="#5a6f9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(29 452 658)">Eₖ = mv²/2</text>
+<text x="395" y="161" font-size="79" fill="#626b8a" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-28 395 161)">Eₚ = mgh</text>
+<text x="979" y="867" font-size="68" fill="#5b7a9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(13 979 867)">T = 2π√(l/g)</text>
+<text x="165" y="385" font-size="56" fill="#557a8a" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-24 165 385)">Fₐ = ρgV</text>
+<text x="1075" y="255" font-size="51" fill="#4e6d8f" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(2 1075 255)">Q = cmΔt</text>
+<text x="357" y="104" font-size="51" fill="#626b8a" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-13 357 104)">I = q/t</text>
+<text x="1326" y="814" font-size="45" fill="#4f7d8f" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(16 1326 814)">F = kx</text>
+<text x="113" y="303" font-size="61" fill="#557a8a" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(22 113 303)">n = c/v</text>
+<text x="22" y="648" font-size="57" fill="#6a6f9e" opacity="0.18" font-family="Georgia, 'Times New Roman', serif" transform="rotate(19 22 648)">R = ρl/S</text>
+<text x="258" y="438" font-size="60" fill="#6a6f9e" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-5 258 438)">ω = 2π/T</text>
+<text x="761" y="447" font-size="49" fill="#5f7d7a" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-6 761 447)">ħ = h/2π</text>
+<text x="236" y="298" font-size="46" fill="#5f7d7a" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-31 236 298)">ε</text>
+<text x="588" y="748" font-size="42" fill="#7a6f9e" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(2 588 748)">μ₀</text>
+<text x="1217" y="197" font-size="41" fill="#7a6f9e" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(3 1217 197)">g ≈ 9.8 м/с²</text>
+<text x="642" y="205" font-size="35" fill="#4f7d8f" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(25 642 205)">c ≈ 3·10⁸ м/с</text>
+<text x="682" y="778" font-size="84" fill="#4f7d8f" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(9 682 778)">1/f = 1/d + 1/F</text>
+<text x="770" y="360" font-size="63" fill="#626b8a" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(27 770 360)">A = UIt</text>
+  </g>
+</svg>

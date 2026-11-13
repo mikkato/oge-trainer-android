@@ -1,0 +1,19 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<rect x="70" y="50" width="300" height="200" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 90 120 Q 150 80 210 130 T 340 150" fill="none" stroke="#4a90d9" stroke-width="2"/>
+<path d="M 120 200 Q 180 180 240 210" fill="none" stroke="#4a90d9" stroke-width="2"/>
+<line x1="110" y1="90" x2="200" y2="90" stroke="#ff6b5c" stroke-width="2"/>
+<text x="150" y="80" fill="#ff6b5c" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">A————B</text>
+<rect x="70" y="280" width="300" height="6" fill="#e6e8ec"/>
+<rect x="70" y="276" width="150" height="14" fill="#ff6b5c" opacity="0.85"/>
+<rect x="370" y="280" width="6" height="6" fill="#e6e8ec"/>
+<rect x="220" y="280" width="6" height="6" fill="#e6e8ec"/>
+<text x="70" y="266" fill="#e6e8ec" font-size="16" font-family="Arial, sans-serif">0</text>
+<text x="212" y="266" fill="#e6e8ec" font-size="16" font-family="Arial, sans-serif">50</text>
+<text x="362" y="266" fill="#e6e8ec" font-size="16" font-family="Arial, sans-serif">100 м</text>
+<text x="440" y="140" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">линейный масштаб</text>
+<text x="440" y="170" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">численный: 1 : 1000</text>
+<text x="440" y="200" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">именованный:</text>
+<text x="440" y="224" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">в 1 см — 10 м</text>
+</svg>

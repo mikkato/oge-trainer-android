@@ -1,0 +1,826 @@
+[
+ {
+  "code": "math.num",
+  "title": "Числа и вычисления",
+  "subject": "math",
+  "parent": null,
+  "order": 0,
+  "source": "fipi"
+ },
+ {
+  "code": "math.alg",
+  "title": "Алгебраические выражения",
+  "subject": "math",
+  "parent": null,
+  "order": 1,
+  "source": "fipi"
+ },
+ {
+  "code": "math.alg.1",
+  "title": "Преобразование алгебраических выражений",
+  "subject": "math",
+  "parent": "math.alg",
+  "order": 2,
+  "source": "fipi"
+ },
+ {
+  "code": "math.eq",
+  "title": "Уравнения и неравенства",
+  "subject": "math",
+  "parent": null,
+  "order": 3,
+  "source": "fipi"
+ },
+ {
+  "code": "math.eq.1",
+  "title": "Линейные и квадратные уравнения",
+  "subject": "math",
+  "parent": "math.eq",
+  "order": 4,
+  "source": "fipi"
+ },
+ {
+  "code": "math.eq.2",
+  "title": "Текстовые задачи",
+  "subject": "math",
+  "parent": "math.eq",
+  "order": 5,
+  "source": "fipi"
+ },
+ {
+  "code": "math.seq",
+  "title": "Числовые последовательности",
+  "subject": "math",
+  "parent": null,
+  "order": 6,
+  "source": "fipi"
+ },
+ {
+  "code": "math.func",
+  "title": "Функции и графики",
+  "subject": "math",
+  "parent": null,
+  "order": 7,
+  "source": "fipi"
+ },
+ {
+  "code": "math.coord",
+  "title": "Координаты на прямой и плоскости",
+  "subject": "math",
+  "parent": null,
+  "order": 8,
+  "source": "fipi"
+ },
+ {
+  "code": "math.coord.1",
+  "title": "Координатная прямая",
+  "subject": "math",
+  "parent": "math.coord",
+  "order": 9,
+  "source": "fipi"
+ },
+ {
+  "code": "math.coord.2",
+  "title": "Декартовы координаты на плоскости",
+  "subject": "math",
+  "parent": "math.coord",
+  "order": 10,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom",
+  "title": "Геометрия",
+  "subject": "math",
+  "parent": null,
+  "order": 11,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom.1",
+  "title": "Треугольники",
+  "subject": "math",
+  "parent": "math.geom",
+  "order": 12,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom.2",
+  "title": "Четырёхугольники",
+  "subject": "math",
+  "parent": "math.geom",
+  "order": 13,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom.3",
+  "title": "Окружность и круг",
+  "subject": "math",
+  "parent": "math.geom",
+  "order": 14,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom.4",
+  "title": "Измерение геометрических величин",
+  "subject": "math",
+  "parent": "math.geom",
+  "order": 15,
+  "source": "fipi"
+ },
+ {
+  "code": "math.geom.5",
+  "title": "Векторы на плоскости",
+  "subject": "math",
+  "parent": "math.geom",
+  "order": 16,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob",
+  "title": "Вероятность и статистика",
+  "subject": "math",
+  "parent": null,
+  "order": 17,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob.1",
+  "title": "Описательная статистика",
+  "subject": "math",
+  "parent": "math.prob",
+  "order": 18,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob.2",
+  "title": "Вероятность",
+  "subject": "math",
+  "parent": "math.prob",
+  "order": 19,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob.3",
+  "title": "Комбинаторика",
+  "subject": "math",
+  "parent": "math.prob",
+  "order": 20,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob.4",
+  "title": "Множества",
+  "subject": "math",
+  "parent": "math.prob",
+  "order": 21,
+  "source": "fipi"
+ },
+ {
+  "code": "math.prob.5",
+  "title": "Графы",
+  "subject": "math",
+  "parent": "math.prob",
+  "order": 22,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.speech",
+  "title": "Язык и речь",
+  "subject": "rus",
+  "parent": null,
+  "order": 0,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.speech.1",
+  "title": "Устная и письменная речь",
+  "subject": "rus",
+  "parent": "rus.speech",
+  "order": 1,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.speech.2",
+  "title": "Изложение",
+  "subject": "rus",
+  "parent": "rus.speech",
+  "order": 2,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.speech.3",
+  "title": "Сочинение",
+  "subject": "rus",
+  "parent": "rus.speech",
+  "order": 3,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.text",
+  "title": "Текст",
+  "subject": "rus",
+  "parent": null,
+  "order": 4,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.text.1",
+  "title": "Признаки текста. Типы речи",
+  "subject": "rus",
+  "parent": "rus.text",
+  "order": 5,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.text.2",
+  "title": "Средства связи предложений",
+  "subject": "rus",
+  "parent": "rus.text",
+  "order": 6,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.text.3",
+  "title": "Информационная переработка текста",
+  "subject": "rus",
+  "parent": "rus.text",
+  "order": 7,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.styles",
+  "title": "Функциональные разновидности языка",
+  "subject": "rus",
+  "parent": null,
+  "order": 8,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system",
+  "title": "Система языка",
+  "subject": "rus",
+  "parent": null,
+  "order": 9,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system.1",
+  "title": "Фонетика и графика",
+  "subject": "rus",
+  "parent": "rus.system",
+  "order": 10,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system.2",
+  "title": "Лексикология и фразеология",
+  "subject": "rus",
+  "parent": "rus.system",
+  "order": 11,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system.3",
+  "title": "Морфемика и словообразование",
+  "subject": "rus",
+  "parent": "rus.system",
+  "order": 12,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system.4",
+  "title": "Морфология",
+  "subject": "rus",
+  "parent": "rus.system",
+  "order": 13,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.system.5",
+  "title": "Синтаксис",
+  "subject": "rus",
+  "parent": "rus.system",
+  "order": 14,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.norms",
+  "title": "Культура речи",
+  "subject": "rus",
+  "parent": null,
+  "order": 15,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.spell",
+  "title": "Орфография",
+  "subject": "rus",
+  "parent": null,
+  "order": 16,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.punct",
+  "title": "Пунктуация",
+  "subject": "rus",
+  "parent": null,
+  "order": 17,
+  "source": "fipi"
+ },
+ {
+  "code": "rus.express",
+  "title": "Выразительность русской речи",
+  "subject": "rus",
+  "parent": null,
+  "order": 18,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech",
+  "title": "Механические явления",
+  "subject": "physics",
+  "parent": null,
+  "order": 0,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech.1",
+  "title": "Кинематика",
+  "subject": "physics",
+  "parent": "phys.mech",
+  "order": 1,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech.2",
+  "title": "Динамика",
+  "subject": "physics",
+  "parent": "phys.mech",
+  "order": 2,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech.3",
+  "title": "Законы сохранения",
+  "subject": "physics",
+  "parent": "phys.mech",
+  "order": 3,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech.4",
+  "title": "Статика и давление",
+  "subject": "physics",
+  "parent": "phys.mech",
+  "order": 4,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.mech.5",
+  "title": "Колебания и волны",
+  "subject": "physics",
+  "parent": "phys.mech",
+  "order": 5,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat",
+  "title": "Тепловые явления",
+  "subject": "physics",
+  "parent": null,
+  "order": 6,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat.1",
+  "title": "Строение вещества",
+  "subject": "physics",
+  "parent": "phys.heat",
+  "order": 7,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat.2",
+  "title": "Внутренняя энергия и теплопередача",
+  "subject": "physics",
+  "parent": "phys.heat",
+  "order": 8,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat.3",
+  "title": "Количество теплоты",
+  "subject": "physics",
+  "parent": "phys.heat",
+  "order": 9,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat.4",
+  "title": "Изменение агрегатных состояний",
+  "subject": "physics",
+  "parent": "phys.heat",
+  "order": 10,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.heat.5",
+  "title": "Тепловые двигатели",
+  "subject": "physics",
+  "parent": "phys.heat",
+  "order": 11,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro",
+  "title": "Электромагнитные явления",
+  "subject": "physics",
+  "parent": null,
+  "order": 12,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro.1",
+  "title": "Электрические заряды",
+  "subject": "physics",
+  "parent": "phys.electro",
+  "order": 13,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro.2",
+  "title": "Постоянный электрический ток",
+  "subject": "physics",
+  "parent": "phys.electro",
+  "order": 14,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro.3",
+  "title": "Магнитные явления",
+  "subject": "physics",
+  "parent": "phys.electro",
+  "order": 15,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro.4",
+  "title": "Электромагнитные волны",
+  "subject": "physics",
+  "parent": "phys.electro",
+  "order": 16,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.electro.5",
+  "title": "Геометрическая оптика",
+  "subject": "physics",
+  "parent": "phys.electro",
+  "order": 17,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.quantum",
+  "title": "Квантовые явления",
+  "subject": "physics",
+  "parent": null,
+  "order": 18,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.quantum.1",
+  "title": "Радиоактивность",
+  "subject": "physics",
+  "parent": "phys.quantum",
+  "order": 19,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.quantum.2",
+  "title": "Строение атома и ядра",
+  "subject": "physics",
+  "parent": "phys.quantum",
+  "order": 20,
+  "source": "fipi"
+ },
+ {
+  "code": "phys.quantum.3",
+  "title": "Ядерные реакции",
+  "subject": "physics",
+  "parent": "phys.quantum",
+  "order": 21,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.study",
+  "title": "Географическое изучение Земли",
+  "subject": "geography",
+  "parent": null,
+  "order": 0,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.maps",
+  "title": "Изображения земной поверхности",
+  "subject": "geography",
+  "parent": null,
+  "order": 1,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.earth",
+  "title": "Земля — планета Солнечной системы",
+  "subject": "geography",
+  "parent": null,
+  "order": 2,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature",
+  "title": "Оболочки Земли",
+  "subject": "geography",
+  "parent": null,
+  "order": 3,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature.1",
+  "title": "Литосфера",
+  "subject": "geography",
+  "parent": "geo.nature",
+  "order": 4,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature.2",
+  "title": "Гидросфера",
+  "subject": "geography",
+  "parent": "geo.nature",
+  "order": 5,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature.3",
+  "title": "Атмосфера",
+  "subject": "geography",
+  "parent": "geo.nature",
+  "order": 6,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature.4",
+  "title": "Биосфера",
+  "subject": "geography",
+  "parent": "geo.nature",
+  "order": 7,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.nature.5",
+  "title": "Географическая оболочка",
+  "subject": "geography",
+  "parent": "geo.nature",
+  "order": 8,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.world",
+  "title": "Человечество на Земле. Материки и страны",
+  "subject": "geography",
+  "parent": null,
+  "order": 9,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.ecology",
+  "title": "Взаимодействие природы и общества",
+  "subject": "geography",
+  "parent": null,
+  "order": 10,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia",
+  "title": "География России",
+  "subject": "geography",
+  "parent": null,
+  "order": 11,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.1",
+  "title": "Географическое пространство России",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 12,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.2",
+  "title": "Природа России",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 13,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.3",
+  "title": "Население России",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 14,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.4",
+  "title": "Хозяйство России",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 15,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.5",
+  "title": "Регионы России",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 16,
+  "source": "fipi"
+ },
+ {
+  "code": "geo.russia.6",
+  "title": "Россия в современном мире",
+  "subject": "geography",
+  "parent": "geo.russia",
+  "order": 17,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.science",
+  "title": "Биология — наука о живой природе",
+  "subject": "biology",
+  "parent": null,
+  "order": 0,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.ecology",
+  "title": "Среда обитания и сообщества",
+  "subject": "biology",
+  "parent": null,
+  "order": 1,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.ecology.1",
+  "title": "Среды обитания и экологические факторы",
+  "subject": "biology",
+  "parent": "bio.ecology",
+  "order": 2,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.ecology.2",
+  "title": "Природные и искусственные сообщества",
+  "subject": "biology",
+  "parent": "bio.ecology",
+  "order": 3,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.ecology.3",
+  "title": "Человек и окружающая среда",
+  "subject": "biology",
+  "parent": "bio.ecology",
+  "order": 4,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.evolution",
+  "title": "Эволюционное развитие организмов",
+  "subject": "biology",
+  "parent": null,
+  "order": 5,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.bacteria",
+  "title": "Бактерии, грибы, лишайники",
+  "subject": "biology",
+  "parent": null,
+  "order": 6,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.plants",
+  "title": "Растительный организм",
+  "subject": "biology",
+  "parent": null,
+  "order": 7,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.plants.1",
+  "title": "Строение и жизнедеятельность растений",
+  "subject": "biology",
+  "parent": "bio.plants",
+  "order": 8,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.plants.2",
+  "title": "Размножение и развитие растений",
+  "subject": "biology",
+  "parent": "bio.plants",
+  "order": 9,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.plants.3",
+  "title": "Систематика растений",
+  "subject": "biology",
+  "parent": "bio.plants",
+  "order": 10,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.animals",
+  "title": "Животный организм",
+  "subject": "biology",
+  "parent": null,
+  "order": 11,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.animals.1",
+  "title": "Строение и жизнедеятельность животных",
+  "subject": "biology",
+  "parent": "bio.animals",
+  "order": 12,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.animals.2",
+  "title": "Беспозвоночные животные",
+  "subject": "biology",
+  "parent": "bio.animals",
+  "order": 13,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.animals.3",
+  "title": "Позвоночные животные",
+  "subject": "biology",
+  "parent": "bio.animals",
+  "order": 14,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human",
+  "title": "Человек и его здоровье",
+  "subject": "biology",
+  "parent": null,
+  "order": 15,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human.1",
+  "title": "Клетка, ткани, органы и системы органов",
+  "subject": "biology",
+  "parent": "bio.human",
+  "order": 16,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human.2",
+  "title": "Нервная и эндокринная системы",
+  "subject": "biology",
+  "parent": "bio.human",
+  "order": 17,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human.3",
+  "title": "Опорно-двигательная система. Кровь и кровообращение",
+  "subject": "biology",
+  "parent": "bio.human",
+  "order": 18,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human.4",
+  "title": "Дыхание, пищеварение и обмен веществ",
+  "subject": "biology",
+  "parent": "bio.human",
+  "order": 19,
+  "source": "fipi"
+ },
+ {
+  "code": "bio.human.5",
+  "title": "Выделение, органы чувств и поведение",
+  "subject": "biology",
+  "parent": "bio.human",
+  "order": 20,
+  "source": "fipi"
+ }
+]

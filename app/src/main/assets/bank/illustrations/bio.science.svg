@@ -1,0 +1,18 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<rect x="250" y="300" width="140" height="16" rx="3" fill="#e6e8ec"/>
+<line x1="320" y1="300" x2="320" y2="120" stroke="#e6e8ec" stroke-width="4"/>
+<rect x="280" y="230" width="80" height="20" rx="3" fill="#e6e8ec"/>
+<circle cx="320" cy="150" r="14" fill="none" stroke="#e6e8ec" stroke-width="3"/>
+<circle cx="320" cy="110" r="14" fill="none" stroke="#e6e8ec" stroke-width="3"/>
+<line x1="290" y1="230" x2="250" y2="230" stroke="#ff6b5c" stroke-width="2"/>
+<circle cx="320" cy="270" r="30" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<text x="470" y="120" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">окуляр</text>
+<text x="470" y="160" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">объектив</text>
+<text x="470" y="240" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">предметный столик</text>
+<text x="470" y="280" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">зеркало</text>
+<line x1="430" y1="115" x2="465" y2="115" stroke="#e6e8ec" stroke-width="1"/>
+<line x1="430" y1="155" x2="465" y2="155" stroke="#e6e8ec" stroke-width="1"/>
+<line x1="430" y1="235" x2="465" y2="235" stroke="#e6e8ec" stroke-width="1"/>
+<line x1="430" y1="275" x2="465" y2="275" stroke="#e6e8ec" stroke-width="1"/>
+</svg>

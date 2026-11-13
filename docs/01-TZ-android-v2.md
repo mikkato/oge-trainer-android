@@ -202,7 +202,13 @@
 | NFR-11 | Никаких сетевых вызовов, кроме настроенного провайдера; телеметрии нет |
 | NFR-12 | Миграции Room обратимы в пределах мажорной версии; обновление APK не теряет попытки |
 
-## 8. Модель данных (Room)
+## 8. Модель данных (SQLite, схема `data/db/Schema.kt`)
+
+> Изменение v2.1 (13.11.2026): **Room заменён на прямую работу с SQLite** (`SQLiteOpenHelper`).
+> Причина: KSP существует только до Kotlin 2.3, а AGP 9.5.1 требует встроенный Kotlin 2.4.x —
+> генератор Room подключить нечем. Схема и имена полей сохранены, запросы живут в
+> репозиториях (`BankRepository`, `ProfilesRepository`, `StudyRepository`), все вызовы идут
+> через `Dispatchers.IO`. Миграции — в `OgeDatabase.onUpgrade`.
 
 | Таблица | Поля | Назначение |
 |---|---|---|
@@ -263,20 +269,20 @@
 | OQ-6 | Кто ведёт пометку «доверенная» | Предложение: родитель вручную в v1 |
 | OQ-7 | Перенос истории старых веб-учёток | **Решено:** пароли не переносятся, история 5 попыток и освоение импортируются как архив (`assets/content-v1/attempts-archive.json`, `mastery-archive.json`) |
 
-## 13. Приложение: версии (проверено 13.11.2026)
+## 13. Приложение: версии (проверено и подтверждено сборкой 13.11.2026)
 
 | Компонент | Версия |
 |---|---|
-| Kotlin / AGP / Gradle / JDK | 2.2.10 / 9.5.1 / 9.8.2 / 21 |
+| Kotlin / AGP / Gradle / JDK | 2.4.21 / 9.5.1 / 9.8.2 / 21 |
 | Compose BOM | 2026.09.00 |
-| compileSdk / targetSdk / minSdk | 36 / 36 / 31 |
-| Ktor client | 3.6.1 |
-| kotlinx.serialization | 1.13.0 |
-| Room | 2.8.5 |
-| Navigation Compose | 2.10.2 |
-| DataStore | 1.3.0 |
-| security-crypto | 1.1.0 |
-| WorkManager (импорт/экспорт) | 2.12.0 |
-| Markwon (резерв рендера) | 4.6.2 |
-| jlatexmath-android (резерв рендера) | 0.2.0 |
-| KaTeX-ассеты | из web-сборки `oge-web` (19 файлов шрифтов + css/js) |
+| compileSdk / targetSdk / minSdk | 37 (minor 2) / 37 / 31 |
+| Ktor client | 3.6.1 (в сборке 0.1.0 не используется — этап 3) |
+| Room | **не используется** (KSP недоступен для Kotlin 2.4) — SQLite напрямую |
+| Navigation Compose | 2.10.2 (в 0.1.0 навигация на состоянии; подключение при росте экранов) |
+| DataStore / security-crypto / WorkManager | 1.3.0 / 1.1.0 / 2.12.0 |
+| KaTeX | 0.19.1 (офлайн-ассеты в `assets/render/katex`) |
+| marked | 18.2.0 (`assets/render/marked.min.js`) |
+| Факт сборки | `app-release.apk` 3,2 МБ (R8 + shrink), `app-debug.apk` 41 МБ |
+
+Отклонения от первоначального ТЗ зафиксированы в разделе 8 (SQLite вместо Room) и здесь
+(версии стека). Решение по рендеру — `docs/04-G1-RENDERER.md`.

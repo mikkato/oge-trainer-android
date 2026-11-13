@@ -1,0 +1,20 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<circle cx="80" cy="180" r="22" fill="#ff6b5c"/>
+<text x="80" y="186" fill="#161920" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">α</text>
+<line x1="102" y1="170" x2="180" y2="170" stroke="#ff6b5c" stroke-width="2" marker-end="url(#e)"/>
+<circle cx="80" cy="230" r="22" fill="#e6a13c"/>
+<text x="80" y="236" fill="#161920" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">β</text>
+<line x1="102" y1="230" x2="280" y2="230" stroke="#e6a13c" stroke-width="2" marker-end="url(#f)"/>
+<circle cx="80" cy="130" r="22" fill="#7c9ce6"/>
+<text x="80" y="136" fill="#161920" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">γ</text>
+<line x1="102" y1="130" x2="580" y2="130" stroke="#7c9ce6" stroke-width="2" marker-end="url(#g)"/>
+<rect x="180" y="95" width="12" height="120" fill="#e6e8ec" opacity="0.5"/>
+<text x="186" y="250" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">бумага</text>
+<rect x="280" y="95" width="12" height="120" fill="#c0c8d4" opacity="0.7"/>
+<text x="286" y="250" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">алюминий</text>
+<rect x="420" y="95" width="22" height="120" fill="#8a93a3" opacity="0.85"/>
+<text x="431" y="250" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">свинец</text>
+<defs><marker id="e" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ff6b5c"/></marker><marker id="f" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e6a13c"/></marker><marker id="g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c9ce6"/></marker></defs>
+<text x="320" y="320" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">проникающая способность излучений</text>
+</svg>

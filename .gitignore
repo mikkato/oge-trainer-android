@@ -3,6 +3,7 @@
 *.key
 *.jks
 *.keystore
+keystore.properties
 local.properties
 
 # сборка Android

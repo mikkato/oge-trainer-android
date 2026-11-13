@@ -1,0 +1,16 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<path d="M 300 300 C 290 250 250 230 240 190" stroke="#e6a13c" stroke-width="4" fill="none"/>
+<ellipse cx="320" cy="180" rx="110" ry="65" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<ellipse cx="320" cy="180" rx="95" ry="52" fill="none" stroke="#4a90d9" stroke-width="1.5"/>
+<path d="M 240 200 Q 200 180 220 150 Q 260 130 270 160" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<text x="420" y="140" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">клеточная стенка</text>
+<text x="420" y="170" fill="#4a90d9" font-size="17" font-family="Arial, sans-serif">мембрана</text>
+<text x="420" y="200" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">нуклеоид (ДНК)</text>
+<text x="420" y="230" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">цитоплазма</text>
+<text x="150" y="140" fill="#e6a13c" font-size="17" font-family="Arial, sans-serif">жгутик</text>
+<line x1="420" y1="137" x2="470" y2="137" stroke="#e6e8ec" stroke-width="1"/>
+<line x1="420" y1="167" x2="470" y2="167" stroke="#4a90d9" stroke-width="1"/>
+<line x1="420" y1="197" x2="470" y2="197" stroke="#e6e8ec" stroke-width="1"/>
+<line x1="420" y1="227" x2="470" y2="227" stroke="#e6e8ec" stroke-width="1"/>
+</svg>

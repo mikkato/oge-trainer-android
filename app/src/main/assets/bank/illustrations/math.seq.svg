@@ -1,0 +1,20 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<line x1="60" y1="180" x2="580" y2="180" stroke="#e6e8ec" stroke-width="2"/>
+<polygon points="580,180 564,173 564,187" fill="#e6e8ec"/>
+<circle cx="120" cy="180" r="6" fill="#ff6b5c"/>
+<circle cx="220" cy="180" r="6" fill="#ff6b5c"/>
+<circle cx="320" cy="180" r="6" fill="#ff6b5c"/>
+<circle cx="420" cy="180" r="6" fill="#ff6b5c"/>
+<circle cx="520" cy="180" r="6" fill="#ff6b5c"/>
+<text x="120" y="150" fill="#e6e8ec" font-size="20" font-family="Arial, sans-serif" text-anchor="middle">a₁</text>
+<text x="220" y="150" fill="#e6e8ec" font-size="20" font-family="Arial, sans-serif" text-anchor="middle">a₂</text>
+<text x="320" y="150" fill="#e6e8ec" font-size="20" font-family="Arial, sans-serif" text-anchor="middle">a₃</text>
+<text x="420" y="150" fill="#e6e8ec" font-size="20" font-family="Arial, sans-serif" text-anchor="middle">a₄</text>
+<text x="520" y="150" fill="#e6e8ec" font-size="20" font-family="Arial, sans-serif" text-anchor="middle">a₅</text>
+<line x1="120" y1="230" x2="220" y2="230" stroke="#ff6b5c" stroke-width="2"/>
+<line x1="220" y1="230" x2="320" y2="230" stroke="#ff6b5c" stroke-width="2"/>
+<text x="170" y="252" fill="#ff6b5c" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">d</text>
+<text x="270" y="252" fill="#ff6b5c" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">d</text>
+<text x="320" y="320" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">арифметическая прогрессия: aₙ = a₁ + (n−1)·d</text>
+</svg>
