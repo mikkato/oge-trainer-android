@@ -18,6 +18,13 @@ class SettingsRepository(context: Context) {
     /** Выбранная локальная модель (id из [ru.tolmachev.ogetrainer.data.models.ModelCatalog]); null — не выбрана. */
     val localModel: StateFlow<String?> = _localModel
 
+    private val _checkModel = MutableStateFlow(prefs.getString(KEY_CHECK_MODEL, null))
+    /**
+     * Модель для проверки письменных ответов. Отдельная от генерации: проверка требует
+     * более крупной модели, генерация — быстрой. null — проверять моделью генерации.
+     */
+    val checkModel: StateFlow<String?> = _checkModel
+
     private fun readTheme(): ThemeMode =
         when (prefs.getString(KEY_THEME, ThemeMode.SYSTEM.name)) {
             ThemeMode.LIGHT.name -> ThemeMode.LIGHT
@@ -37,8 +44,16 @@ class SettingsRepository(context: Context) {
         _localModel.value = id
     }
 
+    fun setCheckModel(id: String?) {
+        prefs.edit().apply {
+            if (id.isNullOrBlank()) remove(KEY_CHECK_MODEL) else putString(KEY_CHECK_MODEL, id)
+        }.apply()
+        _checkModel.value = id
+    }
+
     private companion object {
         const val KEY_THEME = "theme_mode"
         const val KEY_LOCAL_MODEL = "local_model"
+        const val KEY_CHECK_MODEL = "check_model"
     }
 }

@@ -58,6 +58,8 @@ fun ModelsScreen(onBack: () -> Unit) {
     val download by ModelDownloads.state.collectAsState()
     val activeModel by Graph.settings.localModel.collectAsState()
 
+    val checkModel by Graph.settings.checkModel.collectAsState()
+
     fun refresh() {
         installed = ModelCatalog.entries.associate { it.id to ModelDownloads.installedBytes(context, it) }
     }
@@ -102,12 +104,32 @@ fun ModelsScreen(onBack: () -> Unit) {
                 }
             }
 
+            Card {
+                Column(verticalArrangement = Arrangement.spacedBy(Space.x0_5)) {
+                    Text("Проверка письменных", style = MaterialTheme.typography.labelMedium, color = colors.muted)
+                    Text(
+                        ModelCatalog.byId(checkModel ?: "")?.title
+                            ?: "Не выбрана — проверяет модель генерации",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.text,
+                    )
+                    Text(
+                        "Проверка сложнее генерации: здесь нужна модель крупнее (3B и выше). " +
+                            "Она подгружается перед проверкой сама — держать две модели в памяти одновременно нельзя.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.muted,
+                    )
+                }
+            }
+
             ModelCatalog.entries.forEach { entry ->
                 ModelCard(
                     entry = entry,
                     device = device,
                     installedBytes = installed[entry.id] ?: 0L,
                     isActive = activeModel == entry.id,
+                    isCheck = checkModel == entry.id,
+                    onSetCheck = { Graph.settings.setCheckModel(if (checkModel == entry.id) null else entry.id) },
                     download = download,
                     onDownload = {
                         ModelDownloads.start(context, entry)
@@ -161,6 +183,8 @@ private fun ModelCard(
     device: DeviceProfile?,
     installedBytes: Long,
     isActive: Boolean,
+    isCheck: Boolean,
+    onSetCheck: () -> Unit,
     download: ModelDownloads.State,
     onDownload: () -> Unit,
     onPause: () -> Unit,
@@ -196,7 +220,11 @@ private fun ModelCard(
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        entry.title + if (isActive) " · выбрана" else "",
+                        buildString {
+                            append(entry.title)
+                            if (isActive) append(" · генерация")
+                            if (isCheck) append(" · проверка")
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (isActive) OgeColors.Accent else colors.text,
                     )
@@ -274,10 +302,11 @@ private fun ModelCard(
                 when {
                     isInstalled -> {
                         if (isActive) {
-                            GhostButton(text = "Выбрана") { }
+                            GhostButton(text = "Для генерации") { }
                         } else {
                             PrimaryButton(text = "Выбрать", modifier = Modifier.weight(1f)) { onSelect() }
                         }
+                        GhostButton(text = if (isCheck) "Проверка ✓" else "Для проверки") { onSetCheck() }
                         GhostButton(text = "Удалить") { onDelete() }
                     }
                     busy -> {

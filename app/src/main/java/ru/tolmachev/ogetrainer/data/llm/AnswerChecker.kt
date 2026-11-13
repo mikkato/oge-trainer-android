@@ -5,6 +5,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import kotlin.math.roundToInt
 import ru.tolmachev.ogetrainer.data.db.TaskItem
 import ru.tolmachev.ogetrainer.data.models.ModelEntry
 import ru.tolmachev.ogetrainer.data.provider.ProviderRepository
@@ -88,7 +89,8 @@ class AnswerChecker(private val provider: ProviderRepository) {
             appendLine(Rubric.describe(criteria))
             appendLine(
                 "JSON: {\"criteria\":[{\"id\":1,\"met\":true,\"comment\":\"...\"}], " +
-                    "\"score\": 0..${task.maxPoints}, \"confidence\": 0..1, \"summary\": \"...\"}",
+                    "\"score\": <целое число баллов от 0 до ${task.maxPoints}, не доля>, " +
+                    "\"confidence\": 0..1, \"summary\": \"...\"}",
             )
         }
         val prompt = ChatPrompt.build(entry, system, user)
@@ -121,7 +123,14 @@ class AnswerChecker(private val provider: ProviderRepository) {
         val confidence = json.optDouble("confidence", 0.0)
         if (confidence < MIN_CONFIDENCE) return null
 
-        val score = json.optDouble("score", -1.0)
+        val rawScore = json.optDouble("score", -1.0)
+        if (rawScore < 0) return null
+        // Модели любят отвечать долей (0,6) вместо баллов. Если шкала не единичная,
+        // а ответ в 0..1 — это доля, пересчитываем и округляем до целого балла.
+        val score = when {
+            maxScore > 1.0 && rawScore in 0.0..1.0 -> (rawScore * maxScore).roundToInt().toDouble()
+            else -> rawScore
+        }
         if (score < 0 || score > maxScore) return null
 
         val items = json.optJSONArray("criteria")
@@ -145,7 +154,10 @@ class AnswerChecker(private val provider: ProviderRepository) {
         // Модель не разметила ни один критерий — доверять баллу нельзя.
         if (verdicts.isEmpty()) return null
 
-        Log.i("AnswerChecker", "verdict source=$source score=$score/$maxScore conf=$confidence")
+        Log.i(
+            "AnswerChecker",
+            "verdict source=$source score=$score/$maxScore conf=$confidence raw=$rawScore",
+        )
         return AnswerVerdict(
             score = score,
             maxScore = maxScore,

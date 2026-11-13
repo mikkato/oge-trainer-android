@@ -392,13 +392,13 @@ private fun PracticePane(
                                 current.rubricOrDefault(),
                                 Rubric.forType(current.type, current.maxPoints),
                             )
-                            val localModel = Graph.settings.localModel.value?.let {
-                                ru.tolmachev.ogetrainer.data.models.ModelCatalog.byId(it)
-                            }
+                            // Для проверки — отдельная модель (если выбрана), иначе модель генерации.
+                            val checkEntry = (Graph.settings.checkModel.value ?: Graph.settings.localModel.value)
+                                ?.let { ru.tolmachev.ogetrainer.data.models.ModelCatalog.byId(it) }
                             val verdict = when {
-                                localModel != null && LocalLlm.isLoaded ->
+                                checkEntry != null && LocalLlm.isAvailable ->
                                     Graph.answerChecker.checkLocal(
-                                        context, localModel, current, answer, criteria,
+                                        context, checkEntry, current, answer, criteria,
                                     ).getOrNull()
                                 Graph.provider.hasKey() ->
                                     Graph.answerChecker.checkCloud(current, answer, criteria).getOrNull()
@@ -418,6 +418,7 @@ private fun PracticePane(
                                         put("confidence", it.confidence)
                                         put("summary", it.summary)
                                         put("source", it.source)
+                                        put("model", checkEntry?.title ?: "")
                                         put(
                                             "criteria",
                                             org.json.JSONArray().apply {

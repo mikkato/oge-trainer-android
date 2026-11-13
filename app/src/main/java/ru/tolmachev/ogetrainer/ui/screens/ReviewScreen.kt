@@ -140,8 +140,10 @@ private fun ReviewCard(
             )
 
             verdict?.let { json ->
+                val modelName = json.optString("model").takeIf { it.isNotBlank() }
                 Text(
-                    "Предварительная оценка модели: ${json.optInt("score")} из ${item.maxPoints} · " +
+                    "Предварительная оценка модели" + (modelName?.let { " ($it)" } ?: "") + ": " +
+                        "${json.optInt("score")} из ${item.maxPoints} · " +
                         "уверенность ${(json.optDouble("confidence", 0.0) * 100).toInt()} %",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
