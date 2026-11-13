@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -147,16 +148,21 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
             }
             if (topic == null) {
                 item {
-                    androidx.compose.foundation.layout.Box(
-                        Modifier
+                    // Фильтр источником: чипы M3 в прокрутке — подписи не обрезаются.
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(Space.x1_5),
                     ) {
-                        ChoiceRow(
-                            options = listOf("Все", "Банк", "Шаблоны", "Локально", "Облако"),
-                            selected = filter,
-                            onSelect = { filter = it },
-                        )
+                        listOf("Все", "Банк", "Шаблоны", "Локально", "Облако").forEach { option ->
+                            FilterChip(
+                                selected = filter == option,
+                                onClick = { filter = option },
+                                label = { Text(option, style = MaterialTheme.typography.labelLarge) },
+                                shape = MaterialTheme.shapes.small,
+                            )
+                        }
                     }
                 }
             }
