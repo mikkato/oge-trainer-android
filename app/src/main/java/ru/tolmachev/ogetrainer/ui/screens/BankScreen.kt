@@ -40,6 +40,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +52,10 @@ import ru.tolmachev.ogetrainer.Graph
 import ru.tolmachev.ogetrainer.data.bank.BankRepository
 import ru.tolmachev.ogetrainer.ui.components.Card as AppCard
 import ru.tolmachev.ogetrainer.ui.components.ChoiceRow
+import ru.tolmachev.ogetrainer.ui.components.GhostButton
+import ru.tolmachev.ogetrainer.ui.components.MarkdownView
+import ru.tolmachev.ogetrainer.ui.components.MathText
+import ru.tolmachev.ogetrainer.ui.components.PrimaryButton
 import ru.tolmachev.ogetrainer.ui.components.SectionLabel
 import ru.tolmachev.ogetrainer.ui.components.TopBar
 import ru.tolmachev.ogetrainer.ui.theme.Space
@@ -77,6 +83,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
     var generateFor by remember { mutableStateOf<BankRepository.TopicBankRow?>(null) }
     var openedTask by remember { mutableStateOf<BankRepository.BankTask?>(null) }
     var reload by remember { mutableStateOf(0) }
+    var reviewMode by remember { mutableStateOf(false) }
 
     val originFilter: String? = when (filter) {
         "Банк" -> "bank"
@@ -103,12 +110,14 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         TopBar(
             title = when {
+                reviewMode -> "Приёмка черновиков"
                 topic != null -> "Задачи темы"
                 subject != null -> subject!!.second
                 else -> "Банк контента"
             },
             onBack = {
                 when {
+                    reviewMode -> { reviewMode = false; reload++ }
                     topic != null -> topic = null
                     subject != null -> subject = null
                     else -> onBack()
@@ -116,6 +125,9 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
             },
         )
 
+        if (reviewMode) {
+            DraftReviewPane(subjectCode = subject?.first, onExit = { reviewMode = false; reload++ })
+        } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -148,6 +160,11 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                                         MaterialTheme.colorScheme.onSurfaceVariant
                                     },
                                 )
+                                if (s.drafts > 0) {
+                                    TextButton(onClick = { reviewMode = true }) {
+                                        Text("Открыть приёмку")
+                                    }
+                                }
                             }
                         }
                     }
@@ -212,7 +229,9 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                             shape = MaterialTheme.shapes.small,
                         )
                         DropdownMenu(expanded = gradeMenu, onDismissRequest = { gradeMenu = false }) {
-                            listOf<Int?>(null, 5, 6, 7, 8, 9).forEach { option ->
+                            listOf<Int?>(null) + (1..11) + listOf(gradeFilter).filterNotNull()
+                                .filter { it !in 1..11 }.distinct()
+                                .forEach { option ->
                                 DropdownMenuItem(
                                     text = { Text(option?.let { "$it класс" } ?: "Все классы") },
                                     onClick = {
@@ -343,6 +362,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                     }
                 }
             }
+        }
         }
     }
 
@@ -590,4 +610,109 @@ private fun plural(count: Int, one: String, few: String, many: String): String {
         else -> many
     }
     return "$count $word"
+}
+
+/**
+ * Очередь приёмки черновиков: задачи идут подряд по предмету и теме;
+ * «Принять» отправляет задачу ученику, «Удалить» — отклоняет.
+ */
+@Composable
+private fun DraftReviewPane(subjectCode: String?, onExit: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    var queue by remember { mutableStateOf<List<BankRepository.DraftQueueItem>?>(null) }
+    var index by remember { mutableStateOf(0) }
+    var reload by remember { mutableStateOf(0) }
+    var done by remember { mutableStateOf(0) }
+
+    LaunchedEffect(subjectCode, reload) {
+        queue = Graph.bank.draftQueue(subjectCode)
+        if (index >= (queue?.size ?: 0)) index = 0
+    }
+
+    val items = queue
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Space.x1),
+        verticalArrangement = Arrangement.spacedBy(Space.x2),
+    ) {
+        when {
+            items == null -> Text("Загрузка…")
+            items.isEmpty() || index >= items.size -> {
+                SectionLabel("Приёмка завершена")
+                Text(
+                    if (items == null || items.isEmpty()) "Черновиков не осталось."
+                    else "Очередь пройдена, черновики этого предмета приняты/отклонены.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                GhostButton(text = "Готово", onClick = onExit)
+            }
+            else -> {
+                val item = items[index]
+                Text(
+                    "Черновик ${index + 1} из ${items.size} · принято за сессию: $done",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "${item.subjectTitle} · ${item.topicTitle} · ${item.grade} класс · " +
+                        sourceLabel(item.origin),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                AppCard {
+                    Column {
+                        MarkdownView(
+                            markdown = MathText.promptForRender(item.media, item.prompt),
+                            dark = isSystemInDarkTheme(),
+                        )
+                        if (item.solution.isNotBlank()) {
+                            HorizontalDivider(Modifier.padding(vertical = Space.x1))
+                            MarkdownView(
+                                markdown = "**Решение.** " + item.solution +
+                                    "\n\n**Ответ:** " + item.answer.ifBlank { "—" },
+                                dark = isSystemInDarkTheme(),
+                            )
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
+                    PrimaryButton(
+                        text = "Принять",
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        scope.launch {
+                            Graph.bank.approveTask(item.id)
+                            done++
+                            // index не трогаем: после перезагрузки очередь сдвинется сама
+                            reload++
+                        }
+                    }
+                    GhostButton(text = "Удалить") {
+                        scope.launch {
+                            Graph.bank.deleteTask(item.id)
+                            reload++
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
+                    GhostButton(
+                        text = "Пропустить",
+                        modifier = Modifier.weight(1f),
+                    ) { index++ }
+                    if (item.topicCode.isNotBlank()) {
+                        GhostButton(
+                            text = "Принять всю тему",
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            scope.launch {
+                                Graph.bank.approveDrafts(item.topicCode)
+                                reload++
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -571,6 +571,63 @@ class BankRepository(
         db.write { it.delete("tasks", "id = ?", arrayOf(id.toString())) }
     }
 
+    data class DraftQueueItem(
+        val id: Long,
+        val subjectTitle: String,
+        val topicCode: String,
+        val topicTitle: String,
+        val grade: Int,
+        val origin: String,
+        val type: String,
+        val prompt: String,
+        val answer: String,
+        val solution: String,
+        val media: String,
+    )
+
+    /**
+     * Очередь приёмки: все черновики (кроме банка ФИПИ) с контекстом темы.
+     * Отсортированы по предмету/теме, чтобы правки одного блока шли подряд.
+     */
+    suspend fun draftQueue(subjectCode: String? = null, grade: Int? = null, limit: Int = 300): List<DraftQueueItem> =
+        withContext(Dispatchers.IO) {
+            db.read { database ->
+                val args = buildList {
+                    subjectCode?.let { add(it) }
+                    grade?.let { add(it.toString()) }
+                }
+                val where = buildString {
+                    append("t.trusted = 0 AND t.origin <> 'bank'")
+                    if (subjectCode != null) append(" AND t.subject_code = ?")
+                    if (grade != null) append(" AND t.grade = ?")
+                }
+                database.rawQuery(
+                    "SELECT t.id, s.title, tp.code, tp.title, t.grade, t.origin, t.type, " +
+                        "t.prompt, t.answer, t.solution, t.media " +
+                        "FROM tasks t " +
+                        "JOIN subjects s ON s.code = t.subject_code " +
+                        "LEFT JOIN topics tp ON tp.code = t.topic_code " +
+                        "WHERE $where " +
+                        "ORDER BY s.title, t.topic_code, t.id LIMIT ?",
+                    (args + limit.toString()).toTypedArray(),
+                ).mapRows {
+                    DraftQueueItem(
+                        id = it.getLong(0),
+                        subjectTitle = it.getString(1),
+                        topicCode = it.getString(2) ?: "",
+                        topicTitle = it.getString(3) ?: "Без темы",
+                        grade = it.getInt(4),
+                        origin = it.getString(5),
+                        type = it.getString(6),
+                        prompt = it.getString(7),
+                        answer = it.getString(8),
+                        solution = it.getString(9),
+                        media = it.getString(10) ?: "",
+                    )
+                }
+            }
+        }
+
     /** Справочник предметов для формы профиля. */
     suspend fun subjects(): List<Pair<String, String>> = withContext(Dispatchers.IO) {
         db.read { database ->
