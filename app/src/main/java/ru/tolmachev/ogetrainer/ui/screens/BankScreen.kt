@@ -80,6 +80,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
 
     val originFilter: String? = when (filter) {
         "Банк" -> "bank"
+        "ФРП" -> "frp"
         "Шаблоны" -> "local"
         "Локально" -> "llm-local"
         "Облако" -> "llm"
@@ -179,7 +180,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                             expanded = menuOpen,
                             onDismissRequest = { menuOpen = false },
                         ) {
-                            listOf("Все", "Банк", "Шаблоны", "Локально", "Облако").forEach { option ->
+                            listOf("Все", "Банк", "ФРП", "Шаблоны", "Локально", "Облако").forEach { option ->
                                 DropdownMenuItem(
                                     text = { Text(option) },
                                     onClick = {
@@ -563,12 +564,13 @@ private fun BankGenerateDialog(
     )
 }
 
-/** Код предмета по коду темы: банк хранит коды вида math.eq.1 / phys.mech.2. */
+/** Код предмета по коду темы: банк хранит коды вида math.eq.1, план ФРП — geo7.2.3. */
 private fun subjectCodeFor(topic: BankRepository.TopicBankRow): String =
-    topic.code.substringBefore('.')
+    topic.code.substringBefore('.').trimEnd { it.isDigit() }
 
 private fun sourceLabel(origin: String): String = when {
     origin == "bank" -> "Банк ФИПИ"
+    origin == "frp" -> "План ФРП"
     origin.startsWith("local") -> "Шаблон"
     origin == "llm-local" -> "Модель на устройстве"
     origin.startsWith("llm") -> "Облачная модель"

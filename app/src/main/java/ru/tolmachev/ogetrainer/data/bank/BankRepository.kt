@@ -87,6 +87,14 @@ class BankRepository(
                 .use { if (it.moveToFirst()) it.getString(0) else null }
         }
 
+        // План ФРП: темы по классам 1–11 и предгенерированные задачи-черновики.
+        // Формат совпадает с grades.json/tasks.json, чтобы не менять схему БД.
+        val frpDoc = runCatching { JSONObject(asset("frp-topics.json")) }.getOrNull()
+        val frpSubjects = frpDoc?.optJSONArray("subjects") ?: JSONArray()
+        val frpTopics = frpDoc?.optJSONArray("topics") ?: JSONArray()
+        val frpVersion = frpDoc?.optString("version", "frp") ?: "frp"
+        val frpTasks = runCatching { JSONArray(asset("frp-tasks.json")) }.getOrDefault(JSONArray())
+
         var inserted = 0
         db.write { database ->
             subjects.forEachObject { item ->
@@ -98,6 +106,18 @@ class BankRepository(
                         put("title", item.getString("title"))
                     },
                     SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
+            frpSubjects.forEachObject { item ->
+                // Существующие предметы банка (math, rus, ...) не переименовываем.
+                database.insertWithOnConflict(
+                    "subjects",
+                    null,
+                    ContentValues().apply {
+                        put("code", item.getString("code"))
+                        put("title", item.getString("title"))
+                    },
+                    SQLiteDatabase.CONFLICT_IGNORE,
                 )
             }
 
@@ -114,6 +134,24 @@ class BankRepository(
                         put("title", item.getString("title"))
                         put("pos", item.optInt("order"))
                         put("source", "curriculum")
+                        put("grade", item.optInt("grade", 9))
+                    },
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
+
+            // Темы плана ФРП: разделы и темы всех классов 1–11.
+            frpTopics.forEachObject { item ->
+                database.insertWithOnConflict(
+                    "topics",
+                    null,
+                    ContentValues().apply {
+                        put("code", item.getString("code"))
+                        put("subject_code", item.getString("subject"))
+                        put("parent_code", item.optString("parent").ifBlank { null })
+                        put("title", item.getString("title"))
+                        put("pos", item.optInt("order"))
+                        put("source", "frp")
                         put("grade", item.optInt("grade", 9))
                     },
                     SQLiteDatabase.CONFLICT_REPLACE,
@@ -191,12 +229,39 @@ class BankRepository(
                 if (id != -1L) inserted++
             }
 
+            // Задачи ФРП: предгенерированные моделью, trusted из файла (по умолчанию 0 — черновики).
+            frpTasks.forEachObject { item ->
+                val type = item.getString("type")
+                val topic = item.getString("topic")
+                val prompt = item.getString("prompt")
+                val row = ContentValues().apply {
+                    put("subject_code", item.getString("subject"))
+                    put("topic_code", topic)
+                    put("type", type)
+                    put("prompt", prompt)
+                    put("answer", item.optString("answer"))
+                    put("solution", item.optString("solution"))
+                    put("max_points", item.optInt("max_points", 1))
+                    put("trusted", if (item.optBoolean("trusted")) 1 else 0)
+                    put("origin", "frp")
+                    put("grade", database.gradeOfTopic(topic))
+                    put("content_hash", sha256("$type|$topic|$prompt"))
+                }
+                val id = database.insertWithOnConflict(
+                    "tasks",
+                    null,
+                    row,
+                    SQLiteDatabase.CONFLICT_IGNORE,
+                )
+                if (id != -1L) inserted++
+            }
+
             database.insertWithOnConflict(
                 "sync_meta",
                 null,
                 ContentValues().apply {
                     put("key", "bank_stamp")
-                    put("value", stamp)
+                    put("value", "$stamp+$frpVersion")
                 },
                 SQLiteDatabase.CONFLICT_REPLACE,
             )
