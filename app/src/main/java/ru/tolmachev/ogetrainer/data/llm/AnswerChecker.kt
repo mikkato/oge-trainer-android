@@ -91,12 +91,12 @@ class AnswerChecker(private val provider: ProviderRepository) {
                     "\"score\": 0..${task.maxPoints}, \"confidence\": 0..1, \"summary\": \"...\"}",
             )
         }
-        val prompt = "<|im_start|>system\n$system<|im_end|>\n<|im_start|>user\n$user<|im_end|>\n" +
-            "<|im_start|>assistant\n"
+        val prompt = ChatPrompt.build(entry, system, user)
         val raw = LocalLlm.complete(context, prompt, maxTokens = 500, temperature = 0.2f)
         if (raw.isBlank()) {
             return@withContext Result.failure(IllegalStateException("Модель не вернула текст"))
         }
+        Log.i("AnswerChecker", "raw ответ модели (${raw.length} симв.): " + raw.take(400).replace("\n", " "))
         val verdict = parse(raw, criteria, source = "llm-local", maxScore = task.maxPoints.toDouble())
             ?: return@withContext Result.failure(IllegalStateException("Модель ответила не по формату"))
         Result.success(verdict)

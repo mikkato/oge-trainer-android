@@ -184,17 +184,8 @@ class LocalLlmGenerator(private val db: ru.tolmachev.ogetrainer.data.db.OgeDatab
     }
 
     /** Шаблон диалога зависит от семейства модели: иначе качество падает в разы. */
-    private fun promptFor(entry: ModelEntry, system: String, user: String): String = when {
-        entry.repo.contains("gemma", ignoreCase = true) ->
-            "<start_of_turn>user\n$system\n\n$user<end_of_turn>\n<start_of_turn>model\n"
-        entry.repo.contains("Llama-3", ignoreCase = true) || entry.repo.contains("llama", ignoreCase = true) ->
-            "<|start_header_id|>system<|end_header_id|>\n\n$system<|eot_id|>" +
-                "<|start_header_id|>user<|end_header_id|>\n\n$user<|eot_id|>" +
-                "<|start_header_id|>assistant<|end_header_id|>\n\n"
-        else ->
-            "<|im_start|>system\n$system<|im_end|>\n<|im_start|>user\n$user<|im_end|>\n" +
-                "<|im_start|>assistant\n"
-    }
+    private fun promptFor(entry: ModelEntry, system: String, user: String): String =
+        ChatPrompt.build(entry, system, user)
 
     private fun parseArray(reply: String): JSONArray? {
         val cleaned = reply.replace("```json", "").replace("```", "").trim()
