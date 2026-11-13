@@ -74,6 +74,10 @@ class BankRepository(
         val theories = JSONArray(asset("theories.json"))
         val tasks = JSONArray(asset("tasks.json"))
         // Темы 5–8 классов: отдельный файл, импортируется всегда (он не входит в версию банка).
+        // Конспекты по классам 5–8 лежат отдельно от конспектов ОГЭ.
+        val gradeTheories = runCatching {
+            JSONArray(JSONObject(asset("grades-theories.json")).getJSONArray("theories").toString())
+        }.getOrDefault(JSONArray())
         val gradeTopics = runCatching {
             JSONArray(JSONObject(asset("grades.json")).getJSONArray("topics").toString())
         }.getOrDefault(JSONArray())
@@ -134,6 +138,20 @@ class BankRepository(
             }
 
             theories.forEachObject { item ->
+                database.insertWithOnConflict(
+                    "theories",
+                    null,
+                    ContentValues().apply {
+                        put("topic_code", item.getString("topic"))
+                        put("title", item.getString("title"))
+                        put("content", item.getString("content"))
+                        put("updated_at", System.currentTimeMillis())
+                    },
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
+
+            gradeTheories.forEachObject { item ->
                 database.insertWithOnConflict(
                     "theories",
                     null,
@@ -303,6 +321,19 @@ class BankRepository(
                 grades = database.rawQuery("SELECT DISTINCT grade FROM topics ORDER BY grade", null)
                     .mapRows { it.getInt(0) },
             )
+        }
+    }
+
+    /**
+     * Классы, по которым в базе есть принятые задания (trusted = 1).
+     * Ползунок класса в профиле ограничен этим списком: незачем выбирать класс без контента.
+     */
+    suspend fun gradesWithContent(): List<Int> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                "SELECT DISTINCT t.grade FROM tasks t WHERE t.trusted = 1 ORDER BY t.grade",
+                null,
+            ).mapRows { it.getInt(0) }
         }
     }
 

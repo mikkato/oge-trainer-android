@@ -79,6 +79,8 @@ fun ProfileEditorScreen(
     var fullName by remember { mutableStateOf(profile?.fullName ?: "") }
     var age by remember { mutableStateOf(if ((profile?.age ?: 0) > 0) profile!!.age.toString() else "") }
     var grade by remember { mutableStateOf(0) }
+    // Классы, по которым в базе есть принятый контент: ползунок ходит только по ним.
+    var availableGrades by remember { mutableStateOf<List<Int>>(emptyList()) }
     var program by remember { mutableStateOf("oge") }
     var subjects by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -102,6 +104,14 @@ fun ProfileEditorScreen(
                 program = programInfo.second
                 selectedSubjects = programInfo.third.toSet()
             }
+        }
+        // Ползунок ограничен классами с принятым контентом: класс профиля подтягиваем
+        // к ближайшему доступному, иначе положение ползунка не совпадало бы с подписью.
+        val grades = runCatching { Graph.bank.gradesWithContent() }.getOrDefault(emptyList())
+        availableGrades = grades
+        if (grades.isNotEmpty() && grade !in grades) {
+            grade = grades.minByOrNull { kotlin.math.abs(it - grade) } ?: grades.first()
+            program = if (grade == 9) "oge" else "school"
         }
     }
 
@@ -254,14 +264,15 @@ fun ProfileEditorScreen(
                                     modifier = Modifier.padding(start = Space.x2, top = Space.x2, bottom = Space.x0_5),
                                 )
                             }
+                            val positions = availableGrades.ifEmpty { listOf(5, 9) }
                             Slider(
-                                value = if (grade in 1..11) (grade - 1).toFloat() else 4f,
+                                value = positions.indexOf(grade).coerceAtLeast(0).toFloat(),
                                 onValueChange = { value ->
-                                    grade = (value.toInt() + 1).coerceIn(1, 11)
+                                    grade = positions[value.toInt().coerceIn(positions.indices)]
                                     program = if (grade == 9) "oge" else "school"
                                 },
-                                valueRange = 0f..10f,
-                                steps = 9,
+                                valueRange = 0f..(positions.size - 1).toFloat(),
+                                steps = (positions.size - 2).coerceAtLeast(0),
                                 colors = SliderDefaults.colors(
                                     thumbColor = OgeColors.Accent,
                                     activeTrackColor = OgeColors.Accent,
@@ -274,10 +285,24 @@ fun ProfileEditorScreen(
                                     .padding(horizontal = Space.x1),
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
-                                Text("1", style = MaterialTheme.typography.labelSmall, color = colors.muted)
+                                Text(
+                                    positions.first().toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = colors.muted,
+                                )
                                 Box(Modifier.weight(1f))
-                                Text("11", style = MaterialTheme.typography.labelSmall, color = colors.muted)
+                                Text(
+                                    positions.last().toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = colors.muted,
+                                )
                             }
+                            Text(
+                                "Доступны классы с подтверждённым контентом: " +
+                                    positions.joinToString(", ") + ".",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colors.muted,
+                            )
                             Text(
                                 text = if (program == "oge") "Программа: ОГЭ" else "Программа: школьная",
                                 style = MaterialTheme.typography.labelMedium,

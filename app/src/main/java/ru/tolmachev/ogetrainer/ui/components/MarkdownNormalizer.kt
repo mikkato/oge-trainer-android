@@ -36,32 +36,85 @@ object MarkdownNormalizer {
     )
     private val mathSignal = Regex("[\\^_=×÷·/<>]|\\d\\s*[+\\-]\\s*\\d")
 
+    /**
+     * Приведение текста к разметке KaTeX.
+     *
+     * Разбор идёт сканером: текст делится на готовые формулы (`$...$`, `$$...$$`)
+     * и обычные фрагменты. В обычных фрагментах оборачиваются голые команды LaTeX
+     * и математические выражения. Раньше регулярки шли по всему тексту сразу и
+     * вставляли вторую пару долларов внутрь уже размеченной формулы — отсюда были
+     * артефакты вида «$$\dfrac{6}{8}$ = …» и висящие доллары в конце фразы.
+     */
     fun toKatex(source: String): String {
         if (source.isBlank()) return source
 
-        var text = decodeEntities(source)
-        text = text.replace("\\(", "$").replace("\\)", "$")
-        text = text.replace("\\[", "$$").replace("\\]", "$$")
+        val text = decodeEntities(source)
+            .replace("\\(", "$").replace("\\)", "$")
+            .replace("\\[", "$$").replace("\\]", "$$")
 
-        // Голые LaTeX-команды вне формул: «\frac{1}{2}» без $...$ KaTeX не увидит.
-        text = bareCommand.replace(text) { match ->
-            if (match.value.isBlank()) match.value else "$" + match.value + "$"
+        val out = StringBuilder(text.length + 32)
+        var index = 0
+        while (index < text.length) {
+            val ch = text[index]
+            if (ch == '$') {
+                val block = index + 1 < text.length && text[index + 1] == '$'
+                val open = if (block) 2 else 1
+                val close = findClose(text, index + open, block)
+                if (close > 0) {
+                    val body = text.substring(index + open, close).trim()
+                    if (body.isNotEmpty()) {
+                        out.append('$').append(body).append('$')
+                        index = close + (if (block) 2 else 1)
+                        continue
+                    }
+                }
+                // Одиночный или незакрытый доллар оставляем как есть.
+                out.append(ch)
+                index++
+                continue
+            }
+            var next = index
+            while (next < text.length && text[next] != '$') next++
+            out.append(wrapPlain(text.substring(index, next)))
+            index = next
         }
+        return out.toString()
+    }
 
-        // Всё, что уже размечено как формула, изымаем, чтобы не обернуть повторно.
+    /** Позиция закрывающего делимитера или -1, если формула не закрыта. */
+    private fun findClose(text: String, from: Int, block: Boolean): Int {
+        var j = from
+        while (j < text.length) {
+            if (text[j] == '\\') {
+                j += 2
+                continue
+            }
+            if (text[j] == '$') {
+                if (!block) return j
+                if (j + 1 < text.length && text[j + 1] == '$') return j
+            }
+            j++
+        }
+        return -1
+    }
+
+    /** Обычный фрагмент: оборачиваем голые команды и математические выражения. */
+    private fun wrapPlain(plain: String): String {
+        if (plain.isBlank()) return plain
         val kept = mutableListOf<String>()
         fun stash(value: String): String {
             kept += value
             return "\u0000" + (kept.size - 1) + "\u0000"
         }
-        text = mathBlock.replace(text) { stash(it.value) }
-        text = mathInline.replace(text) { stash(wrapLatex(it.value)) }
 
-        // Голые математические фрагменты: только ASCII-алфавит, кириллица разрывает
-        // фрагмент — поэтому русские слова внутрь формулы не попадают.
+        // Голые LaTeX-команды: «\frac{1}{2}» без $...$ KaTeX не увидит.
+        var text = bareCommand.replace(plain) { match ->
+            if (match.value.isBlank()) match.value else stash("$" + match.value + "$")
+        }
+
+        // Математические фрагменты в ASCII-алфавите; кириллица разрывает фрагмент.
         text = mathCandidate.replace(text) { match ->
             val raw = match.value
-            // Точка и запятая в конце фразы — пунктуация, а не часть формулы.
             val fragment = raw.trim().trimEnd('.', ',', ';')
             val start = raw.indexOf(fragment)
             val prefix = raw.substring(0, start.coerceAtLeast(0))
@@ -76,9 +129,7 @@ object MarkdownNormalizer {
             }
         }
 
-        kept.forEachIndexed { index, value ->
-            text = text.replace("\u0000$index\u0000", value)
-        }
+        kept.forEachIndexed { i, value -> text = text.replace("\u0000$i\u0000", value) }
         return text
     }
 

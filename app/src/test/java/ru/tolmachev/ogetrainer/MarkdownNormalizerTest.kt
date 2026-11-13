@@ -72,4 +72,32 @@ class MarkdownNormalizerTest {
         assertFalse(plain.contains(d))
         assertTrue(plain.contains("1/2"))
     }
+
+    @Test
+    fun `формула с дробями не получает лишних долларов`() {
+        val source = "Отсюда сокращение: " + d + "\\dfrac{6}{8} = \\dfrac{3}{4}" + d + "."
+        val output = MarkdownNormalizer.toKatex(source)
+        assertEquals("Отсюда сокращение: $d\\dfrac{6}{8} = \\dfrac{3}{4}$.", output)
+        assertFalse("двойные доллары: $output", output.contains(dd))
+    }
+
+    @Test
+    fun `блочная формула становится строчной`() {
+        val source = dd + "\\frac{a}{b} \\pm \\frac{c}{d}" + dd
+        val output = MarkdownNormalizer.toKatex(source)
+        assertEquals("$d\\frac{a}{b} \\pm \\frac{c}{d}$", output)
+    }
+
+    @Test
+    fun `голая команда latex оборачивается один раз`() {
+        val output = MarkdownNormalizer.toKatex("Дробь \\frac{1}{2} меньше единицы")
+        assertEquals("Дробь $d\\frac{1}{2}$ меньше единицы", output)
+    }
+
+    @Test
+    fun `несколько формул в тексте не склеиваются`() {
+        val source = "Пример: " + d + "\\dfrac{2}{4} - \\dfrac{2}{8} = \\dfrac{1}{4}" + d + " верно."
+        val output = MarkdownNormalizer.toKatex(source)
+        assertEquals(2, output.count { it == Char(36) })
+    }
 }
