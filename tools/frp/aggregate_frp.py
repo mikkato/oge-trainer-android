@@ -25,6 +25,8 @@ SUBJ_TITLE = {
 }
 # темы этих kind не получают задач (генерация их пропускает), но остаются в дереве тем
 SKIP_TASKS = {"control", "project"}
+# Задания, требующие графику, без неё нерешаемы — в тренажёр не попадают (кроме имеющих media)
+VISUAL_RE = re.compile(r"рисунк|на рис\.|чертёж|чертеж|схем|график|диаграмм|фотограф|аэрофот|снимк|иллюстрац", re.I)
 # Решение пользователя (вопрос 2): второй эшелон — вне тренажёра (в thematic_plan.json сохраняется)
 NO_TRAINER = {"music", "pe", "tech", "odnknr", "orkse", "art"}
 
@@ -63,14 +65,28 @@ for key, by_grade in plan["plan"].items():
                 got = gen.get(t["title"])
                 if not got or t["kind"] in SKIP_TASKS:
                     continue
-                stats["gen"] += len(got["tasks"])
                 for task in got["tasks"]:
-                    tasks.append({
+                    if not task.get("media") and VISUAL_RE.search(task["prompt"]):
+                        stats["visual"] = stats.get("visual", 0) + 1
+                        continue
+                    stats["gen"] += 1
+                    entry = {
                         "subject": subj, "topic": code,
                         "type": "short" if task["kind"] == "short" else "extended",
                         "prompt": task["prompt"], "answer": task["answer"],
                         "solution": task["solution"], "trusted": False,
-                    })
+                    }
+                    if task.get("media"):
+                        entry["media"] = task["media"]
+                        entry["trusted"] = True  # детерминированная графика: ответ вычислен кодом
+                    tasks.append(entry)
+
+# детерминированная параметрическая графика (генерируется gen_graphs.py)
+graphs_file = os.path.join(HERE, "graph_tasks.json")
+if os.path.exists(graphs_file):
+    for g in json.load(open(graphs_file)):
+        g.setdefault("trusted", True)
+        tasks.append(g)
 
 json.dump({"version": plan["version"], "subjects": sorted(subjects.values(), key=lambda x: x["code"]),
            "topics": topics},

@@ -207,6 +207,7 @@ class StudyRepository(private val db: OgeDatabase) {
                             trusted = cursor.intOf("trusted") == 1,
                             origin = cursor.stringOf("origin"),
                             rubric = runCatching { cursor.stringOf("rubric") }.getOrDefault(""),
+                            media = runCatching { cursor.stringOf("media") }.getOrDefault(""),
                         )
                     }.firstOrNull()
 
@@ -435,6 +436,7 @@ class StudyRepository(private val db: OgeDatabase) {
                                 trusted = it.intOf("trusted") == 1,
                                 origin = it.stringOf("origin"),
                                 rubric = runCatching { it.stringOf("rubric") }.getOrDefault(""),
+                        media = runCatching { it.stringOf("media") }.getOrDefault(""),
                             )
                         }.firstOrNull()
                         if (task != null) {
@@ -600,6 +602,7 @@ class StudyRepository(private val db: OgeDatabase) {
                         trusted = it.intOf("trusted") == 1,
                         origin = it.stringOf("origin"),
                         rubric = runCatching { it.stringOf("rubric") }.getOrDefault(""),
+                        media = runCatching { it.stringOf("media") }.getOrDefault(""),
                     )
                 }
             }

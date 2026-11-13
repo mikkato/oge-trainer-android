@@ -358,6 +358,8 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                 ) {
                     ru.tolmachev.ogetrainer.ui.components.MarkdownView(
                         markdown = buildString {
+                            if (task.media.isNotBlank())
+                                append("![Рисунок](../bank/${task.media})\n\n")
                             append(task.prompt)
                             if (task.solution.isNotBlank()) {
                                 append("\n\n**Решение.** ")

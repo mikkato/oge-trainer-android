@@ -352,7 +352,9 @@ private fun PracticePane(
                         color = colors.muted,
                     )
                     MarkdownView(
-                        markdown = ru.tolmachev.ogetrainer.ui.components.MathText.forKatex(current.prompt),
+                        markdown = ru.tolmachev.ogetrainer.ui.components.MathText.promptForRender(
+                            current.media, current.prompt,
+                        ),
                         dark = androidx.compose.foundation.isSystemInDarkTheme(),
                         modifier = Modifier.fillMaxWidth(),
                     )

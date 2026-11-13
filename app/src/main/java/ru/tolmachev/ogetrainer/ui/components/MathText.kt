@@ -173,6 +173,16 @@ object MathText {
      * Здесь такие степени заворачиваются в формулу, а HTML-сущности переноса строки
      * превращаются в обычный перевод строки.
      */
+    /**
+     * Markdown условия с приложенной графикой: картинка из assets/bank/ идёт первым
+     * блоком. Путь в WebView резолвится от file:///android_asset/render/ — берём ../bank/.
+     */
+    fun promptForRender(media: String, prompt: String): String {
+        val body = forKatex(prompt)
+        if (media.isBlank()) return body
+        return "![Рисунок к заданию](../bank/$media)\n\n$body"
+    }
+
     fun forKatex(source: String): String {
         if (source.isBlank()) return source
         var text = source.replace("&#10;", "\n").replace("&nbsp;", " ").replace("&quot;", "\"")

@@ -128,7 +128,9 @@ fun DiagnosticsScreen(profile: Profile, onFinish: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         ru.tolmachev.ogetrainer.ui.components.MarkdownView(
-                            markdown = ru.tolmachev.ogetrainer.ui.components.MathText.forKatex(current.task.prompt),
+                            markdown = ru.tolmachev.ogetrainer.ui.components.MathText.promptForRender(
+                                current.task.media, current.task.prompt,
+                            ),
                             dark = androidx.compose.foundation.isSystemInDarkTheme(),
                             modifier = Modifier.fillMaxWidth(),
                         )

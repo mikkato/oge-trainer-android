@@ -13,6 +13,11 @@ class OgeDatabase(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // v8 (13.11.2026): поле media — путь к детерминированно сгенерированной графике
+        // (графики функций и скоростей) в assets/bank/.
+        if (oldVersion < 8) {
+            db.execSQL("ALTER TABLE tasks ADD COLUMN media TEXT NOT NULL DEFAULT ''")
+        }
         // v7 (13.11.2026): пробники ОГЭ — отдельный экзаменационный трек.
         if (oldVersion < 7) {
             db.execSQL(

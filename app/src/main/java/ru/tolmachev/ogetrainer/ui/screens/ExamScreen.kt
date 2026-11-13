@@ -221,7 +221,7 @@ fun ExamScreen(profile: Profile, onBack: () -> Unit) {
                     )
                     Card {
                         MarkdownView(
-                            markdown = MathText.forKatex(current.prompt),
+                            markdown = MathText.promptForRender(current.media, current.prompt),
                             dark = isSystemInDarkTheme(),
                             modifier = Modifier.fillMaxWidth(),
                         )

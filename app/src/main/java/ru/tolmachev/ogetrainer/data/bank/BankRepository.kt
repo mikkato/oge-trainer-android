@@ -217,6 +217,7 @@ class BankRepository(
                     put("max_points", item.optInt("max_points", 1))
                     put("trusted", if (item.optBoolean("trusted")) 1 else 0)
                     put("origin", "bank")
+                    put("media", item.optString("media"))
                     put("grade", database.gradeOfTopic(topic))
                     put("content_hash", sha256("$type|$topic|$prompt"))
                 }
@@ -227,6 +228,14 @@ class BankRepository(
                     SQLiteDatabase.CONFLICT_IGNORE,
                 )
                 if (id != -1L) inserted++
+                // Задача уже в базе (старая сборка): догоняем media, не трогая остальные поля.
+                val media = item.optString("media")
+                if (id == -1L && media.isNotBlank()) {
+                    database.execSQL(
+                        "UPDATE tasks SET media = ? WHERE content_hash = ?",
+                        arrayOf(media, sha256("$type|$topic|$prompt")),
+                    )
+                }
             }
 
             // Задачи ФРП: предгенерированные моделью, trusted из файла (по умолчанию 0 — черновики).
@@ -244,6 +253,7 @@ class BankRepository(
                     put("max_points", item.optInt("max_points", 1))
                     put("trusted", if (item.optBoolean("trusted")) 1 else 0)
                     put("origin", "frp")
+                    put("media", item.optString("media"))
                     put("grade", database.gradeOfTopic(topic))
                     put("content_hash", sha256("$type|$topic|$prompt"))
                 }
@@ -368,6 +378,7 @@ class BankRepository(
         val origin: String,
         val trusted: Boolean,
         val grade: Int,
+        val media: String = "",
     )
 
     /** Сводка банка: сколько всего и сколько из этого сгенерировано и ждёт проверки. */
@@ -501,7 +512,7 @@ class BankRepository(
             }
             db.read { database ->
                 database.rawQuery(
-                    "SELECT id, prompt, answer, solution, origin, trusted, grade FROM tasks " +
+                    "SELECT id, prompt, answer, solution, origin, trusted, grade, media FROM tasks " +
                         "WHERE ${conditions.joinToString(" AND ")} ORDER BY id DESC",
                     arrayOf(topicCode),
                 ).mapRows {
@@ -513,6 +524,7 @@ class BankRepository(
                         origin = it.getString(4),
                         trusted = it.getInt(5) == 1,
                         grade = it.getInt(6),
+                        media = it.getString(7) ?: "",
                     )
                 }
             }

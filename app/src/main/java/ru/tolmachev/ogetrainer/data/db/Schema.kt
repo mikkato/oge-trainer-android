@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 7
+    const val VERSION = 8
 
     val CREATE = listOf(
         """
@@ -80,6 +80,7 @@ object Schema {
             origin TEXT NOT NULL DEFAULT 'bank',
             rubric TEXT NOT NULL DEFAULT '',
             grade INTEGER NOT NULL DEFAULT 9,
+            media TEXT NOT NULL DEFAULT '',
             content_hash TEXT NOT NULL UNIQUE
         )
         """,
@@ -205,6 +206,8 @@ data class TaskItem(
     val origin: String,
     /** Рубрика проверки, если задана в банке; иначе берётся по типу задания. */
     val rubric: String = "",
+    /** Путь картинки в assets/bank/ (например media/graphs/math8_1.png); пусто — без графики. */
+    val media: String = "",
 ) {
     fun rubricOrDefault(): String = rubric
 }
