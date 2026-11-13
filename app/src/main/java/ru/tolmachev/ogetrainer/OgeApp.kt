@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import ru.tolmachev.ogetrainer.data.auth.ProfilesRepository
 import ru.tolmachev.ogetrainer.data.bank.BankRepository
 import ru.tolmachev.ogetrainer.data.db.OgeDatabase
+import ru.tolmachev.ogetrainer.data.llm.AnswerChecker
 import ru.tolmachev.ogetrainer.data.llm.LocalLlmGenerator
 import ru.tolmachev.ogetrainer.data.models.ModelDownloads
 import ru.tolmachev.ogetrainer.data.profile.PhotoStore
@@ -56,6 +57,8 @@ object Graph {
         private set
     lateinit var localLlm: LocalLlmGenerator
         private set
+    lateinit var answerChecker: AnswerChecker
+        private set
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -75,6 +78,7 @@ object Graph {
         generator = ContentGenerator(db, provider)
         localGenerator = LocalGenerator(db)
         localLlm = LocalLlmGenerator(db)
+        answerChecker = AnswerChecker(provider)
         ModelDownloads.init(app)
         ModelDownloads.resumeIfNeeded(app)
         scope.launch { runImport() }

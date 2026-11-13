@@ -163,6 +163,33 @@ object MathText {
         return builder.toString()
     }
 
+    private val numericEntity = Regex("&#(\\d{2,7});")
+
+    private val barePower = Regex("(?<![\\w$^])([A-Za-z0-9)]+)\\^(\\{[^}]*\\}|-?\\d+)")
+
+    /**
+     * Подготовка текста к рендеру KaTeX: в банке формулы встречаются без $...$
+     * («x^2 - 5x + 6 = 0»), тогда KaTeX их не видит и показывает как есть.
+     * Здесь такие степени заворачиваются в формулу, а HTML-сущности переноса строки
+     * превращаются в обычный перевод строки.
+     */
+    fun forKatex(source: String): String {
+        if (source.isBlank()) return source
+        var text = source.replace("&#10;", "\n").replace("&nbsp;", " ").replace("&quot;", "\"")
+        // В выгрузке банка спецсимволы пришли HTML-сущностями: &#119886; → a.
+        text = numericEntity.replace(text) { match ->
+            val code = match.groupValues[1].toIntOrNull() ?: return@replace match.value
+            if (code in 32..0x10FFFF) String(Character.toChars(code)) else match.value
+        }
+        text = text.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+        text = barePower.replace(text) { match ->
+            val base = match.groupValues[1]
+            val exponent = match.groupValues[2].removeSurrounding("{", "}")
+            "${'$'}$base^{$exponent}${'$'}"
+        }
+        return text
+    }
+
     /** Безопасный вариант для экранов: при любой ошибке отдаём текст без разметки. */
     fun renderSafe(source: String): String =
         runCatching { render(source) }.getOrElse {

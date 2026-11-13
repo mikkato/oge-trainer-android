@@ -45,35 +45,74 @@ class AnswerNormalizerTest {
 class MasteryTest {
 
     @Test
-    fun `EMA считается по правилу 0_7 на 0_3`() {
-        assertEquals(0.3, Mastery.next(0.0, 1.0), 1e-9)
-        assertEquals(0.51, Mastery.next(0.3, 1.0), 1e-9)
-        assertEquals(0.357, Mastery.next(0.51, 0.0), 1e-9)
+    fun `первые попытки двигают освоение шагом 0_3`() {
+        assertEquals(0.3, Mastery.next(0.0, 1.0, attempts = 0, difficulty = 1), 1e-9)
+        assertEquals(0.51, Mastery.next(0.3, 1.0, attempts = 1, difficulty = 1), 1e-9)
+    }
+
+    @Test
+    fun `повторные попытки двигают мягче - промах не обнуляет тему`() {
+        // Шаг 0,20: с 0,72 неверный ответ даёт 0,576, тема остаётся «в работе», а не «слабо»
+        val afterMiss = Mastery.next(0.72, 0.0, attempts = 4, difficulty = 1)
+        assertEquals(0.576, afterMiss, 1e-9)
+        assertFalse(Mastery.isCompleted(afterMiss))
+        assertFalse(Mastery.isWeak(afterMiss, 5))
+    }
+
+    @Test
+    fun `сложное задание двигает освоение сильнее`() {
+        val easy = Mastery.next(0.4, 1.0, attempts = 5, difficulty = 1)
+        val hard = Mastery.next(0.4, 1.0, attempts = 5, difficulty = 3)
+        assertTrue("сложное $hard должно быть больше простого $easy", hard > easy)
     }
 
     @Test
     fun `освоение ограничено единицей и нулём`() {
-        assertEquals(1.0, Mastery.next(1.0, 1.0), 1e-9)
-        assertEquals(0.0, Mastery.next(0.0, 0.0), 1e-9)
+        assertEquals(1.0, Mastery.next(1.0, 1.0, 3, 3), 1e-9)
+        assertEquals(0.0, Mastery.next(0.0, 0.0, 3, 1), 1e-9)
     }
 
     @Test
-    fun `порог освоенной темы 0_8`() {
-        assertTrue(Mastery.isCompleted(0.8))
-        assertFalse(Mastery.isCompleted(0.79))
+    fun `порог освоенной темы 0_7`() {
+        assertTrue(Mastery.isCompleted(0.7))
+        assertFalse(Mastery.isCompleted(0.69))
     }
 
     @Test
-    fun `слабая тема требует попыток`() {
-        assertTrue(Mastery.isWeak(0.4, 1))
-        assertFalse(Mastery.isWeak(0.4, 0))
-        assertFalse(Mastery.isWeak(0.5, 3))
+    fun `слабость только при трёх и более попытках`() {
+        assertFalse(Mastery.isWeak(0.3, 1))
+        assertFalse(Mastery.isWeak(0.3, 2))
+        assertTrue(Mastery.isWeak(0.3, 3))
+        assertFalse(Mastery.isWeak(0.6, 5))
+        assertEquals("мало данных", Mastery.statusLabel(0.3, 2))
+        assertEquals("слабо", Mastery.statusLabel(0.3, 4))
+        assertEquals("освоено", Mastery.statusLabel(0.75, 4))
     }
 
     @Test
-    fun `прирост до порога за серию верных ответов`() {
+    fun `затухание пять процентов в неделю`() {
+        val weekMs = 7L * 24 * 60 * 60 * 1000
+        val now = 1_000_000_000_000L
+        val decayed = Mastery.decay(0.8, now - 2 * weekMs, now)
+        assertEquals(0.8 * 0.95 * 0.95, decayed, 1e-9)
+        assertEquals(0.8, Mastery.decay(0.8, now - 3 * 24 * 60 * 60 * 1000, now), 1e-9)
+    }
+
+    @Test
+    fun `пять верных ответов подряд дают освоение`() {
         var mastery = 0.0
-        repeat(5) { mastery = Mastery.next(mastery, 1.0) }
-        assertTrue("после пяти верных ответов тема освоена: $mastery", Mastery.isCompleted(mastery))
+        var attempts = 0
+        repeat(5) {
+            mastery = Mastery.next(mastery, 1.0, attempts, 1)
+            attempts++
+        }
+        assertTrue("после пяти верных: $mastery", Mastery.isCompleted(mastery))
+    }
+
+    @Test
+    fun `сложность берётся из источника задания`() {
+        assertEquals(1, ru.tolmachev.ogetrainer.domain.Difficulty.of("bank"))
+        assertEquals(3, ru.tolmachev.ogetrainer.domain.Difficulty.of("local:3"))
+        assertEquals(2, ru.tolmachev.ogetrainer.domain.Difficulty.of("llm:d2"))
     }
 }

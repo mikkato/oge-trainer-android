@@ -49,7 +49,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.tolmachev.ogetrainer.Graph
@@ -73,6 +75,35 @@ fun Card(
     }
 }
 
+/**
+ * Подпись для элемента управления: уменьшает кегль на длинных текстах и никогда
+ * не переносит строку. Нужна потому, что M3 задаёт labelLarge 14 sp, а в сегментах,
+ * чипах и кнопках места меньше — длинное слово иначе обрезается.
+ */
+@Composable
+fun AutoFitText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    maxSize: androidx.compose.ui.unit.TextUnit = 14.sp,
+) {
+    val size = when {
+        text.length <= 10 -> maxSize
+        text.length <= 13 -> (maxSize.value - 1).sp
+        text.length <= 16 -> (maxSize.value - 2).sp
+        else -> 11.sp
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge.copy(fontSize = size),
+        color = color,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
+}
+
 /** Основное действие — заполненная кнопка M3. */
 @Composable
 fun PrimaryButton(
@@ -91,7 +122,7 @@ fun PrimaryButton(
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         contentPadding = ButtonDefaults.TextButtonContentPadding,
-    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
+    ) { AutoFitText(text) }
 }
 
 /** Второстепенное действие — контурная кнопка M3. */
@@ -108,7 +139,7 @@ fun GhostButton(
         modifier = modifier.height(Space.touchTarget),
         shape = MaterialTheme.shapes.small,
         contentPadding = ButtonDefaults.TextButtonContentPadding,
-    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
+    ) { AutoFitText(text) }
 }
 
 /** Индикатор прогресса M3. */
@@ -358,9 +389,7 @@ fun ChoiceRow(
                     inactiveContentColor = colors.muted,
                     inactiveBorderColor = colors.border,
                 ),
-                label = {
-                    Text(option, style = MaterialTheme.typography.labelLarge, maxLines = 1)
-                },
+                label = { AutoFitText(option) },
             )
         }
     }

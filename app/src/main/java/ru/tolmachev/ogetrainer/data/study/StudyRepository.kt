@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import ru.tolmachev.ogetrainer.data.db.OgeDatabase
 import ru.tolmachev.ogetrainer.data.db.SubjectStat
 import ru.tolmachev.ogetrainer.data.db.TaskItem
@@ -14,52 +16,136 @@ import ru.tolmachev.ogetrainer.data.db.longOf
 import ru.tolmachev.ogetrainer.data.db.mapRows
 import ru.tolmachev.ogetrainer.data.db.nullableStringOf
 import ru.tolmachev.ogetrainer.data.db.stringOf
+import ru.tolmachev.ogetrainer.domain.AnswerNormalizer
+import ru.tolmachev.ogetrainer.domain.Difficulty
 import ru.tolmachev.ogetrainer.domain.Mastery
 
-/** Чтение учебных данных и запись попыток — всё локально, без сети. */
+/**
+ * Учебные данные и запись попыток — всё локально.
+ *
+ * Освоение темы: EMA с шагом по числу попыток и сложности задания (см. [Mastery]),
+ * затухание 5 % в неделю применяется при чтении, поэтому в базе хранится «сырое»
+ * значение, а интерфейс видит актуальное.
+ *
+ * Развёрнутые ответы не оцениваются сразу: попытка получает статус pending,
+ * балл от модели считается предварительным и на освоение не влияет до подтверждения
+ * родителем или администратором.
+ */
 class StudyRepository(private val db: OgeDatabase) {
+
+    data class AttemptResult(
+        val correct: Boolean,
+        val points: Int,
+        val maxPoints: Int,
+        val feedback: String,
+        val masteryAfter: Double,
+        val status: String = "checked",
+        /** Сколько попыток по теме после этой — нужно для статуса «мало данных». */
+        val attemptsAfter: Int? = null,
+    )
+
+    data class ReviewItem(
+        val attemptId: Long,
+        val profileId: Long,
+        val profileName: String,
+        val topicTitle: String,
+        val prompt: String,
+        val answer: String,
+        val verdictJson: String?,
+        val suggestedPoints: Int,
+        val maxPoints: Int,
+        val checkedBy: String,
+        val createdAt: Long,
+    )
+
+    data class DiagnosticsTask(
+        val section: String,
+        val subjectCode: String,
+        val task: TaskItem,
+    )
+
+    data class DiagnosticsResult(
+        val tasksDone: Int,
+        val score: Double,
+        val sections: List<Pair<String, Double>>,
+    )
+
+    // ---------- чтение ----------
 
     suspend fun subjectStats(profileId: Long): List<SubjectStat> = withContext(Dispatchers.IO) {
         db.read { database ->
+            val now = System.currentTimeMillis()
             database.rawQuery(
                 """
                 SELECT s.code AS code, s.title AS title,
                        (SELECT COUNT(*) FROM topics t WHERE t.subject_code = s.code) AS topic_count,
                        (SELECT COUNT(*) FROM topics t WHERE t.subject_code = s.code AND
                            COALESCE((SELECT m.mastery FROM topic_mastery m
-                                     WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) >= 0.8) AS completed,
-                       (SELECT AVG(COALESCE((SELECT m.mastery FROM topic_mastery m
-                                     WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0))
-                          FROM topics t WHERE t.subject_code = s.code) AS avg_mastery
+                                     WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) >= 0.0) AS topic_count2
                 FROM subjects s
                 WHERE s.code IN (SELECT ps.subject_code FROM program_subjects ps
                                  JOIN programs p ON p.id = ps.program_id WHERE p.profile_id = ?)
                 ORDER BY s.rowid
                 """.trimIndent(),
-                arrayOf(profileId.toString(), profileId.toString(), profileId.toString()),
-            ).mapRows { cursor ->
-                SubjectStat(
-                    code = cursor.stringOf("code"),
-                    title = cursor.stringOf("title"),
-                    topicCount = cursor.intOf("topic_count"),
-                    completed = cursor.intOf("completed"),
-                    avgMastery = cursor.doubleOf("avg_mastery"),
-                )
-            }
+                arrayOf(profileId.toString(), profileId.toString()),
+            ).mapRows { cursor -> cursor.stringOf("code") to cursor.stringOf("title") }
+                .map { (code, title) ->
+                    val rows = topicMastery(database, profileId, code, now)
+                    val completed = rows.count { Mastery.isCompleted(it.first) }
+                    SubjectStat(
+                        code = code,
+                        title = title,
+                        topicCount = rows.size,
+                        completed = completed,
+                        avgMastery = if (rows.isEmpty()) 0.0 else rows.sumOf { it.first } / rows.size,
+                    )
+                }
         }
     }
 
+    /** mastery и attempts по темам предмета с учётом затухания. */
+    private fun topicMastery(
+        database: SQLiteDatabase,
+        profileId: Long,
+        subjectCode: String,
+        now: Long,
+    ): List<Pair<Double, Int>> =
+        database.rawQuery(
+            """
+            SELECT COALESCE((SELECT m.mastery FROM topic_mastery m
+                             WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) AS mastery,
+                   COALESCE((SELECT m.attempts_count FROM topic_mastery m
+                             WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS attempts,
+                   COALESCE((SELECT m.last_attempt_at FROM topic_mastery m
+                             WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS last_at
+            FROM topics t WHERE t.subject_code = ?
+            """.trimIndent(),
+            arrayOf(profileId.toString(), profileId.toString(), profileId.toString(), subjectCode),
+        ).mapRows {
+            Mastery.decay(it.getDouble(0), it.getLong(2), now) to it.getInt(1)
+        }
+
     suspend fun topics(profileId: Long, subjectCode: String): List<TopicRow> = withContext(Dispatchers.IO) {
         db.read { database ->
+            val now = System.currentTimeMillis()
             database.rawQuery(
                 """
                 SELECT t.code AS code, t.subject_code AS subject_code, t.parent_code AS parent_code,
                        t.title AS title, t.pos AS pos,
                        COALESCE((SELECT m.mastery FROM topic_mastery m
-                                 WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) AS mastery
+                                 WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) AS mastery,
+                       COALESCE((SELECT m.attempts_count FROM topic_mastery m
+                                 WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS attempts,
+                       COALESCE((SELECT m.last_attempt_at FROM topic_mastery m
+                                 WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS last_at
                 FROM topics t WHERE t.subject_code = ? ORDER BY t.pos
                 """.trimIndent(),
-                arrayOf(profileId.toString(), subjectCode),
+                arrayOf(
+                    profileId.toString(),
+                    profileId.toString(),
+                    profileId.toString(),
+                    subjectCode,
+                ),
             ).mapRows { cursor ->
                 TopicRow(
                     code = cursor.stringOf("code"),
@@ -67,16 +153,30 @@ class StudyRepository(private val db: OgeDatabase) {
                     parentCode = cursor.nullableStringOf("parent_code"),
                     title = cursor.stringOf("title"),
                     pos = cursor.intOf("pos"),
-                    mastery = cursor.doubleOf("mastery"),
+                    mastery = Mastery.decay(cursor.doubleOf("mastery"), cursor.longOf("last_at"), now),
+                    attempts = cursor.intOf("attempts"),
                 )
             }
         }
     }
 
-    /** Следующая задача: сначала нерешённые, потом повтор; доверенные — первыми. */
+    /**
+     * Следующая задача: сначала нерешённые, затем повтор. Сложность подбирается под
+     * освоение темы (низкое — базовые, высокое — повышенные), проверенные задачи — первыми.
+     */
     suspend fun pickTask(profileId: Long, topicCode: String, type: String): TaskItem? =
         withContext(Dispatchers.IO) {
             db.read { database ->
+                val mastery = database.rawQuery(
+                    "SELECT mastery FROM topic_mastery WHERE profile_id = ? AND topic_code = ?",
+                    arrayOf(profileId.toString(), topicCode),
+                ).use { if (it.moveToFirst()) it.getDouble(0) else 0.0 }
+                val target = when {
+                    mastery < 0.4 -> 1
+                    mastery < 0.75 -> 2
+                    else -> 3
+                }
+
                 fun query(sql: String, args: Array<String>): TaskItem? = database.rawQuery(sql, args)
                     .mapRows { cursor ->
                         TaskItem(
@@ -90,20 +190,25 @@ class StudyRepository(private val db: OgeDatabase) {
                             maxPoints = cursor.intOf("max_points"),
                             trusted = cursor.intOf("trusted") == 1,
                             origin = cursor.stringOf("origin"),
+                            rubric = runCatching { cursor.stringOf("rubric") }.getOrDefault(""),
                         )
                     }.firstOrNull()
 
+                val base =
+                    "SELECT * FROM tasks WHERE topic_code = ? AND type = ?" +
+                        " AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)"
+                val difficultyLike = arrayOf("local:%", "llm:%")
+
+                // 1) нерешённая задача нужной сложности
                 query(
-                    """
-                    SELECT * FROM tasks WHERE topic_code = ? AND type = ?
-                      AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)
-                    ORDER BY trusted DESC, id LIMIT 1
-                    """.trimIndent(),
-                    arrayOf(topicCode, type, profileId.toString()),
-                ) ?: query(
-                    "SELECT * FROM tasks WHERE topic_code = ? AND type = ? ORDER BY trusted DESC, id LIMIT 1",
-                    arrayOf(topicCode, type),
-                )
+                    "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY trusted DESC, id LIMIT 1",
+                    arrayOf(topicCode, type, profileId.toString()) + difficultyLike,
+                )?.takeIf { Difficulty.of(it.origin) == target }
+                    ?: query("$base ORDER BY trusted DESC, id LIMIT 1", arrayOf(topicCode, type, profileId.toString()))
+                    ?: query(
+                        "SELECT * FROM tasks WHERE topic_code = ? AND type = ? ORDER BY trusted DESC, id LIMIT 1",
+                        arrayOf(topicCode, type),
+                    )
             }
         }
 
@@ -116,16 +221,14 @@ class StudyRepository(private val db: OgeDatabase) {
         }
     }
 
-    /**
-     * Локальная проверка короткого ответа + запись попытки + пересчёт освоения (EMA).
-     * Возвращает записанную попытку или null, если такая попытка уже была (идемпотентность).
-     */
+    // ---------- короткий ответ ----------
+
     suspend fun submitShortAnswer(
         profileId: Long,
         task: TaskItem,
         answerText: String,
     ): AttemptResult? = withContext(Dispatchers.IO) {
-        val correct = ru.tolmachev.ogetrainer.domain.AnswerNormalizer.matches(answerText, task.answer)
+        val correct = AnswerNormalizer.matches(answerText, task.answer)
         val points = if (correct) task.maxPoints else 0
         val score = if (task.maxPoints > 0) points.toDouble() / task.maxPoints else 0.0
         val feedback = buildString {
@@ -141,8 +244,300 @@ class StudyRepository(private val db: OgeDatabase) {
             points = points,
             score = score,
             feedback = feedback,
+            status = "checked",
+            checkedBy = "local",
+            verdictJson = null,
+            affectMastery = true,
         )
     }
+
+    // ---------- развёрнутый ответ ----------
+
+    /**
+     * Запись письменной попытки. Даже при вердикте модели она остаётся pending:
+     * освоение не меняется, пока родитель или админ не подтвердит балл.
+     */
+    suspend fun submitDetailedAnswer(
+        profileId: Long,
+        task: TaskItem,
+        answerText: String,
+        suggestedPoints: Int,
+        checkedBy: String,
+        verdictJson: String?,
+    ): AttemptResult? = withContext(Dispatchers.IO) {
+        val points = suggestedPoints.coerceIn(0, task.maxPoints)
+        val feedback = "Ответ отправлен на проверку. Предварительная оценка: $points из ${task.maxPoints}."
+        writeAttempt(
+            profileId = profileId,
+            task = task,
+            answerText = answerText,
+            correct = false,
+            points = points,
+            score = if (task.maxPoints > 0) points.toDouble() / task.maxPoints else 0.0,
+            feedback = feedback,
+            status = "pending",
+            checkedBy = checkedBy,
+            verdictJson = verdictJson,
+            affectMastery = false,
+        )
+    }
+
+    /** Очередь проверки: все письменные ответы со статусом pending. */
+    suspend fun pendingReviews(profileId: Long? = null): List<ReviewItem> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            val where = if (profileId == null) "a.status = 'pending'" else "a.status = 'pending' AND a.profile_id = ?"
+            val args = if (profileId == null) null else arrayOf(profileId.toString())
+            database.rawQuery(
+                """
+                SELECT a.id, a.profile_id, p.full_name, t.title, ta.prompt, a.answer_text,
+                       a.verdict_json, a.points, a.max_points, a.checked_by, a.created_at
+                FROM attempts a
+                JOIN profiles p ON p.id = a.profile_id
+                JOIN tasks ta ON ta.id = a.task_id
+                LEFT JOIN topics t ON t.code = ta.topic_code
+                WHERE $where
+                ORDER BY a.created_at DESC
+                """.trimIndent(),
+                args,
+            ).mapRows {
+                ReviewItem(
+                    attemptId = it.getLong(0),
+                    profileId = it.getLong(1),
+                    profileName = it.getString(2),
+                    topicTitle = it.getString(3) ?: "",
+                    prompt = it.getString(4),
+                    answer = it.getString(5),
+                    verdictJson = it.getString(6),
+                    suggestedPoints = it.getInt(7),
+                    maxPoints = it.getInt(8),
+                    checkedBy = it.getString(9),
+                    createdAt = it.getLong(10),
+                )
+            }
+        }
+    }
+
+    /** Подтверждение оценки родителем или администратором: только здесь меняется освоение. */
+    suspend fun approveReview(
+        attemptId: Long,
+        reviewer: String,
+        points: Int,
+    ): AttemptResult? = withContext(Dispatchers.IO) {
+        db.write { database ->
+            val row = database.rawQuery(
+                "SELECT profile_id, task_id, max_points FROM attempts WHERE id = ?",
+                arrayOf(attemptId.toString()),
+            ).use { if (it.moveToFirst()) Triple(it.getLong(0), it.getLong(1), it.getInt(2)) else null }
+                ?: return@write null
+
+            val safePoints = points.coerceIn(0, row.third)
+            val score = if (row.third > 0) safePoints.toDouble() / row.third else 0.0
+            database.update(
+                "attempts",
+                ContentValues().apply {
+                    put("points", safePoints)
+                    put("score", score)
+                    put("correct", if (score >= 0.7) 1 else 0)
+                    put("status", "checked")
+                    put("checked_by", reviewer)
+                    put("feedback", "Проверено: $reviewer. Балл $safePoints из ${row.third}.")
+                },
+                "id = ?",
+                arrayOf(attemptId.toString()),
+            )
+
+            val topicCode = database.rawQuery(
+                "SELECT topic_code FROM tasks WHERE id = ?",
+                arrayOf(row.second.toString()),
+            ).use { if (it.moveToFirst()) it.getString(0) else "" }
+
+            val masteryAfter = updateMastery(
+                database = database,
+                profileId = row.first,
+                topicCode = topicCode,
+                score = score,
+                difficulty = 1,
+            )
+            AttemptResult(
+                correct = score >= 0.7,
+                points = safePoints,
+                maxPoints = row.third,
+                feedback = "Оценка подтверждена: $safePoints из ${row.third}.",
+                masteryAfter = masteryAfter,
+                status = "checked",
+                attemptsAfter = attemptCount(database, row.first, topicCode),
+            )
+        }
+    }
+
+    // ---------- диагностика ----------
+
+    /** План диагностики: по одной задаче на раздел, до [limit] заданий. */
+    suspend fun diagnosticsPlan(profileId: Long, limit: Int = 20): List<DiagnosticsTask> =
+        withContext(Dispatchers.IO) {
+            db.read { database ->
+                val sections = database.rawQuery(
+                    """
+                    SELECT t.code, t.parent_code, t.title, t.subject_code
+                    FROM topics t
+                    WHERE t.subject_code IN (
+                        SELECT ps.subject_code FROM program_subjects ps
+                        JOIN programs p ON p.id = ps.program_id WHERE p.profile_id = ?
+                    )
+                    ORDER BY t.subject_code, COALESCE(t.parent_code, t.code), t.pos
+                    """.trimIndent(),
+                    arrayOf(profileId.toString()),
+                ).mapRows {
+                    SectionTopic(
+                        code = it.getString(0),
+                        section = it.getString(1) ?: it.getString(0),
+                        title = it.getString(2),
+                        subject = it.getString(3),
+                    )
+                }
+
+                val perSection = sections.groupBy { it.subject + "|" + it.section }
+                val result = mutableListOf<DiagnosticsTask>()
+                for ((_, topics) in perSection) {
+                    if (result.size >= limit) break
+                    for (topic in topics) {
+                        val task = database.rawQuery(
+                            "SELECT * FROM tasks WHERE topic_code = ? AND type = 'short' " +
+                                "ORDER BY trusted DESC, RANDOM() LIMIT 1",
+                            arrayOf(topic.code),
+                        ).mapRows {
+                            TaskItem(
+                                id = it.longOf("id"),
+                                subjectCode = it.stringOf("subject_code"),
+                                topicCode = it.stringOf("topic_code"),
+                                type = it.stringOf("type"),
+                                prompt = it.stringOf("prompt"),
+                                answer = it.stringOf("answer"),
+                                solution = it.stringOf("solution"),
+                                maxPoints = it.intOf("max_points"),
+                                trusted = it.intOf("trusted") == 1,
+                                origin = it.stringOf("origin"),
+                                rubric = runCatching { it.stringOf("rubric") }.getOrDefault(""),
+                            )
+                        }.firstOrNull()
+                        if (task != null) {
+                            result += DiagnosticsTask(
+                                section = topics.first().section,
+                                subjectCode = topic.subject,
+                                task = task,
+                            )
+                            break
+                        }
+                    }
+                }
+                result
+            }
+        }
+
+    private data class SectionTopic(
+        val code: String,
+        val section: String,
+        val title: String,
+        val subject: String,
+    )
+
+    /**
+     * Сохранение диагностики: начальное освоение темы = точность по её разделу.
+     * Это стартовая точка, а не «пять верных ответов подряд», поэтому m0 пишется
+     * в topic_mastery напрямую с пометкой в diagnostics.
+     */
+    suspend fun saveDiagnostics(
+        profileId: Long,
+        answers: List<Triple<DiagnosticsTask, String, Boolean>>,
+    ): DiagnosticsResult = withContext(Dispatchers.IO) {
+        val bySection = answers.groupBy { it.first.section }
+        val sections = bySection.map { (section, list) ->
+            val accuracy = if (list.isEmpty()) 0.0 else list.count { it.third }.toDouble() / list.size
+            section to accuracy
+        }
+        val overall = if (answers.isEmpty()) 0.0 else answers.count { it.third }.toDouble() / answers.size
+
+        db.write { database ->
+            val now = System.currentTimeMillis()
+            bySection.forEach { (section, list) ->
+                val accuracy = if (list.isEmpty()) 0.0 else list.count { it.third }.toDouble() / list.size
+                val topics = database.rawQuery(
+                    "SELECT code FROM topics WHERE COALESCE(parent_code, code) = ?",
+                    arrayOf(section),
+                ).mapRows { it.getString(0) }
+                topics.forEach { topicCode ->
+                    database.insertWithOnConflict(
+                        "topic_mastery",
+                        null,
+                        ContentValues().apply {
+                            put("profile_id", profileId)
+                            put("topic_code", topicCode)
+                            put("mastery", accuracy.coerceIn(0.0, 1.0))
+                            put("attempts_count", maxOf(1, list.size))
+                            put("last_attempt_at", now)
+                        },
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                    )
+                }
+            }
+            database.insert(
+                "diagnostics",
+                null,
+                ContentValues().apply {
+                    put("profile_id", profileId)
+                    put("created_at", now)
+                    put("tasks_done", answers.size)
+                    put("score", overall)
+                    put("sections_json", JSONArray().apply {
+                        sections.forEach { (name, accuracy) ->
+                            put(JSONObject().put("section", name).put("accuracy", accuracy))
+                        }
+                    }.toString())
+                },
+            )
+        }
+
+        DiagnosticsResult(
+            tasksDone = answers.size,
+            score = overall,
+            sections = sections,
+        )
+    }
+
+    /** Последняя диагностика профиля. */
+    suspend fun lastDiagnostics(profileId: Long): DiagnosticsResult? = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                "SELECT tasks_done, score, sections_json FROM diagnostics " +
+                    "WHERE profile_id = ? ORDER BY created_at DESC LIMIT 1",
+                arrayOf(profileId.toString()),
+            ).use { cursor ->
+                if (!cursor.moveToFirst()) return@use null
+                val array = runCatching { JSONArray(cursor.getString(2)) }.getOrDefault(JSONArray())
+                DiagnosticsResult(
+                    tasksDone = cursor.getInt(0),
+                    score = cursor.getDouble(1),
+                    sections = buildList {
+                        for (index in 0 until array.length()) {
+                            val item = array.optJSONObject(index) ?: continue
+                            add(item.optString("section") to item.optDouble("accuracy", 0.0))
+                        }
+                    },
+                )
+            }
+        }
+    }
+
+    suspend fun attemptsCount(profileId: Long): Int = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                "SELECT COUNT(*) FROM attempts WHERE profile_id = ?",
+                arrayOf(profileId.toString()),
+            ).use { if (it.moveToFirst()) it.getInt(0) else 0 }
+        }
+    }
+
+    // ---------- внутреннее ----------
 
     private fun writeAttempt(
         profileId: Long,
@@ -152,6 +547,10 @@ class StudyRepository(private val db: OgeDatabase) {
         points: Int,
         score: Double,
         feedback: String,
+        status: String,
+        checkedBy: String,
+        verdictJson: String?,
+        affectMastery: Boolean,
     ): AttemptResult? {
         val answerHash = answerText.trim().lowercase().hashCode().toString()
         return db.write { database ->
@@ -168,58 +567,81 @@ class StudyRepository(private val db: OgeDatabase) {
                     put("points", points)
                     put("max_points", task.maxPoints)
                     put("feedback", feedback)
-                    put("status", "checked")
-                    put("checked_by", "local")
+                    put("status", status)
+                    put("checked_by", checkedBy)
+                    put("verdict_json", verdictJson)
                     put("created_at", System.currentTimeMillis())
                 },
                 SQLiteDatabase.CONFLICT_IGNORE,
             )
             if (inserted == -1L) return@write null
 
-            val current = database.rawQuery(
-                "SELECT mastery, attempts_count FROM topic_mastery WHERE profile_id = ? AND topic_code = ?",
-                arrayOf(profileId.toString(), task.topicCode),
-            ).use { cursor ->
-                if (cursor.moveToFirst()) cursor.getDouble(0) to cursor.getInt(1) else 0.0 to 0
+            val masteryAfter = if (affectMastery) {
+                updateMastery(
+                    database = database,
+                    profileId = profileId,
+                    topicCode = task.topicCode,
+                    score = score,
+                    difficulty = Difficulty.of(task.origin),
+                )
+            } else {
+                readMastery(database, profileId, task.topicCode)
             }
-            val next = Mastery.next(current.first, score)
-            database.insertWithOnConflict(
-                "topic_mastery",
-                null,
-                ContentValues().apply {
-                    put("profile_id", profileId)
-                    put("topic_code", task.topicCode)
-                    put("mastery", next)
-                    put("attempts_count", current.second + 1)
-                    put("last_attempt_at", System.currentTimeMillis())
-                },
-                SQLiteDatabase.CONFLICT_REPLACE,
-            )
 
             AttemptResult(
                 correct = correct,
                 points = points,
                 maxPoints = task.maxPoints,
                 feedback = feedback,
-                masteryAfter = next,
+                masteryAfter = masteryAfter,
+                status = status,
+                attemptsAfter = attemptCount(database, profileId, task.topicCode),
             )
         }
     }
 
-    suspend fun attemptsCount(profileId: Long): Int = withContext(Dispatchers.IO) {
-        db.read { database ->
-            database.rawQuery(
-                "SELECT COUNT(*) FROM attempts WHERE profile_id = ?",
-                arrayOf(profileId.toString()),
-            ).use { if (it.moveToFirst()) it.getInt(0) else 0 }
+    private fun attemptCount(database: SQLiteDatabase, profileId: Long, topicCode: String): Int =
+        database.rawQuery(
+            "SELECT attempts_count FROM topic_mastery WHERE profile_id = ? AND topic_code = ?",
+            arrayOf(profileId.toString(), topicCode),
+        ).use { if (it.moveToFirst()) it.getInt(0) else 0 }
+
+    private fun readMastery(database: SQLiteDatabase, profileId: Long, topicCode: String): Double =
+        database.rawQuery(
+            "SELECT mastery FROM topic_mastery WHERE profile_id = ? AND topic_code = ?",
+            arrayOf(profileId.toString(), topicCode),
+        ).use { if (it.moveToFirst()) it.getDouble(0) else 0.0 }
+
+    /** Пересчёт освоения: шаг по числу попыток и сложности задания. */
+    private fun updateMastery(
+        database: SQLiteDatabase,
+        profileId: Long,
+        topicCode: String,
+        score: Double,
+        difficulty: Int,
+    ): Double {
+        val (current, attempts) = database.rawQuery(
+            "SELECT mastery, attempts_count FROM topic_mastery WHERE profile_id = ? AND topic_code = ?",
+            arrayOf(profileId.toString(), topicCode),
+        ).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getDouble(0) to cursor.getInt(1) else 0.0 to 0
         }
+        val next = Mastery.next(current, score, attempts, difficulty)
+        database.insertWithOnConflict(
+            "topic_mastery",
+            null,
+            ContentValues().apply {
+                put("profile_id", profileId)
+                put("topic_code", topicCode)
+                put("mastery", next)
+                put("attempts_count", attempts + 1)
+                put("last_attempt_at", System.currentTimeMillis())
+            },
+            SQLiteDatabase.CONFLICT_REPLACE,
+        )
+        return next
     }
 }
 
-data class AttemptResult(
-    val correct: Boolean,
-    val points: Int,
-    val maxPoints: Int,
-    val feedback: String,
-    val masteryAfter: Double,
-)
+/** Совместимость с прежним импортом верхнего уровня. */
+typealias AttemptResult = StudyRepository.AttemptResult

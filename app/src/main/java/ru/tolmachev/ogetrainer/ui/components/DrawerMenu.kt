@@ -52,9 +52,12 @@ fun DrawerMenu(
     onGoUp: () -> Unit,
     onSubjects: () -> Unit,
     adminVisible: Boolean,
+    reviewer: Boolean,
     onAdmin: () -> Unit,
     onModels: () -> Unit,
     onBank: () -> Unit,
+    onHelp: () -> Unit,
+    onReview: () -> Unit,
     themeMode: ThemeMode,
     onThemeMode: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
@@ -138,11 +141,16 @@ fun DrawerMenu(
                     onClick = { onClose(); onGoUp() },
                 )
                 MenuRow(title = "Предметы", onClick = { onClose(); onSubjects() })
+                if (adminVisible || reviewer) {
+                    MenuRow(title = "Проверка работ", onClick = { onClose(); onReview() })
+                }
                 if (adminVisible) {
                     MenuRow(title = "Администрирование", onClick = { onClose(); onAdmin() })
                     MenuRow(title = "Банк контента", onClick = { onClose(); onBank() })
                     MenuRow(title = "Локальные модели", onClick = { onClose(); onModels() })
                 }
+
+                MenuRow(title = "Помощь", onClick = { onClose(); onHelp() })
 
                 Hairline()
                 SectionLabel("ОФОРМЛЕНИЕ")

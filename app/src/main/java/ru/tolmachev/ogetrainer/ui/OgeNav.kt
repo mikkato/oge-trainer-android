@@ -31,6 +31,9 @@ import ru.tolmachev.ogetrainer.ui.screens.AdminScreen
 import ru.tolmachev.ogetrainer.ui.screens.LoginScreen
 import ru.tolmachev.ogetrainer.ui.screens.ProfileEditorScreen
 import ru.tolmachev.ogetrainer.ui.screens.BankScreen
+import ru.tolmachev.ogetrainer.ui.screens.DiagnosticsScreen
+import ru.tolmachev.ogetrainer.ui.screens.HelpScreen
+import ru.tolmachev.ogetrainer.ui.screens.ReviewScreen
 import ru.tolmachev.ogetrainer.ui.screens.ModelsScreen
 import ru.tolmachev.ogetrainer.ui.screens.ProviderScreen
 import ru.tolmachev.ogetrainer.ui.screens.RenderSpikeScreen
@@ -52,6 +55,10 @@ private sealed interface Route {
     data object Provider : Route
     data object Models : Route
     data object Bank : Route
+    data object Help : Route
+    data object Review : Route
+    /** Диагностический срез для конкретного ученика. */
+    data class Diagnostics(val profile: Profile) : Route
 }
 
 private val ROLE_LABEL = mapOf("student" to "Ученик", "parent" to "Родитель", "admin" to "Администратор")
@@ -104,6 +111,18 @@ fun OgeRoot() {
             true
         }
         Route.Bank -> {
+            route = Route.Admin
+            true
+        }
+        Route.Help -> {
+            route = Route.Subjects
+            true
+        }
+        Route.Review -> {
+            route = Route.Subjects
+            true
+        }
+        is Route.Diagnostics -> {
             route = Route.Admin
             true
         }
@@ -198,11 +217,24 @@ fun OgeRoot() {
                         onOpenProvider = { route = Route.Provider },
                         onOpenModels = { route = Route.Models },
                         onOpenBank = { route = Route.Bank },
+                        onStartDiagnostics = { route = Route.Diagnostics(it) },
                     )
 
                     Route.Provider -> ProviderScreen(onBack = { route = Route.Admin })
 
                     Route.Models -> ModelsScreen(onBack = { route = Route.Admin })
+
+                    Route.Review -> ReviewScreen(reviewer = current, onBack = { route = Route.Subjects })
+
+                    is Route.Diagnostics -> DiagnosticsScreen(
+                        profile = r.profile,
+                        onFinish = { route = Route.Admin },
+                    )
+
+                    Route.Help -> HelpScreen(
+                        role = current.role,
+                        onBack = { route = Route.Subjects },
+                    )
 
                     Route.Bank -> BankScreen(
                         onBack = { route = Route.Admin },
@@ -232,9 +264,12 @@ fun OgeRoot() {
                     onGoUp = { goUp() },
                     onSubjects = { route = Route.Subjects },
                     adminVisible = current.role == "admin",
+                    reviewer = current.role == "parent" || current.role == "admin",
                     onAdmin = { route = Route.Admin },
                     onModels = { route = Route.Models },
                     onBank = { route = Route.Bank },
+                    onHelp = { route = Route.Help },
+                    onReview = { route = Route.Review },
                     themeMode = themeMode,
                     onThemeMode = { Graph.settings.setThemeMode(it) },
                     onLogout = {

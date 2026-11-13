@@ -34,12 +34,14 @@ import ru.tolmachev.ogetrainer.ui.components.TopBar
 import ru.tolmachev.ogetrainer.ui.theme.LocalOgeColors
 import ru.tolmachev.ogetrainer.ui.theme.OgeColors
 import ru.tolmachev.ogetrainer.ui.theme.Space
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -59,6 +61,7 @@ fun AdminScreen(
     onOpenProvider: () -> Unit,
     onOpenModels: () -> Unit,
     onOpenBank: () -> Unit,
+    onStartDiagnostics: (Profile) -> Unit,
 ) {
     val colors = LocalOgeColors.current
     val importState by Graph.importState.collectAsState()
@@ -136,8 +139,9 @@ fun AdminScreen(
                             .padding(horizontal = Space.x1, vertical = Space.x0_5),
                     ) {
                         Text("ИМЯ", style = MaterialTheme.typography.labelSmall, color = colors.muted.copy(alpha = 0.7f), modifier = Modifier.weight(1f))
-                        Text("РОЛЬ", style = MaterialTheme.typography.labelSmall, color = colors.muted.copy(alpha = 0.7f), modifier = Modifier.width(64.dp))
-                        Text("КЛ.", style = MaterialTheme.typography.labelSmall, color = colors.muted.copy(alpha = 0.7f), modifier = Modifier.width(30.dp))
+                        Text("РОЛЬ", style = MaterialTheme.typography.labelSmall, color = colors.muted.copy(alpha = 0.7f), modifier = Modifier.width(56.dp))
+                        Text("КЛ.", style = MaterialTheme.typography.labelSmall, color = colors.muted.copy(alpha = 0.7f), modifier = Modifier.width(26.dp))
+                        Box(Modifier.width(40.dp))
                         Box(Modifier.width(40.dp))
                         Box(Modifier.width(40.dp))
                     }
@@ -178,14 +182,33 @@ fun AdminScreen(
                                 },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.muted,
-                                modifier = Modifier.width(64.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.width(56.dp),
                             )
                             Text(
                                 info?.first?.toString() ?: "—",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.muted,
-                                modifier = Modifier.width(30.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.width(26.dp),
                             )
+                            Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                                if (item.role == "student") {
+                                    IconButton(
+                                        onClick = { onStartDiagnostics(item) },
+                                        modifier = Modifier.size(32.dp),
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.PlayArrow,
+                                            contentDescription = "Диагностика",
+                                            tint = colors.muted,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
+                                }
+                            }
                             Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
                                 if (item.role == "student") {
                                     IconButton(

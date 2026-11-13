@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 4
+    const val VERSION = 5
 
     val CREATE = listOf(
         """
@@ -77,6 +77,7 @@ object Schema {
             max_points INTEGER NOT NULL DEFAULT 1,
             trusted INTEGER NOT NULL DEFAULT 0,
             origin TEXT NOT NULL DEFAULT 'bank',
+            rubric TEXT NOT NULL DEFAULT '',
             content_hash TEXT NOT NULL UNIQUE
         )
         """,
@@ -109,6 +110,17 @@ object Schema {
             PRIMARY KEY (profile_id, topic_code)
         )
         """,
+        """
+        CREATE TABLE IF NOT EXISTS diagnostics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile_id INTEGER NOT NULL,
+            created_at INTEGER NOT NULL,
+            tasks_done INTEGER NOT NULL DEFAULT 0,
+            score REAL NOT NULL DEFAULT 0,
+            sections_json TEXT NOT NULL DEFAULT '[]'
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_attempts_pending ON attempts(profile_id, status)",
         """
         CREATE TABLE IF NOT EXISTS provider_config (
             id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -160,6 +172,8 @@ data class TopicRow(
     val title: String,
     val pos: Int,
     val mastery: Double,
+    /** Число попыток по теме: до трёх вывод об уровне не делается. */
+    val attempts: Int = 0,
 )
 
 data class TaskItem(
@@ -173,7 +187,11 @@ data class TaskItem(
     val maxPoints: Int,
     val trusted: Boolean,
     val origin: String,
-)
+    /** Рубрика проверки, если задана в банке; иначе берётся по типу задания. */
+    val rubric: String = "",
+) {
+    fun rubricOrDefault(): String = rubric
+}
 
 data class BankCounts(
     val subjects: Int,

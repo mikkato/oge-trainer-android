@@ -91,7 +91,9 @@ fun MarkdownView(
                         override fun onPageFinished(view: WebView?, url: String?) {
                             super.onPageFinished(view, url)
                             val payload = tag as? Triple<*, *, *> ?: return
-                            val text = payload.second as? String ?: return
+                            // Единая точка нормализации: сущности, \(...\) и голая математика
+                            val text = (payload.second as? String)?.let { MarkdownNormalizer.toKatex(it) }
+                                ?: return
                             val isDark = payload.third as? Boolean ?: true
                             view?.evaluateJavascript(
                                 "window.setTheme('${if (isDark) "dark" else "light"}');" +

@@ -25,6 +25,22 @@ class OgeDatabase(context: Context) :
             db.execSQL("DELETE FROM profiles")
         }
         // v3 (13.11.2026): карточка профиля — возраст и фото.
+        // v5 (13.11.2026): рубрики развёрнутых ответов, вердикт модели, диагностические срезы.
+        if (oldVersion < 5) {
+            db.execSQL("ALTER TABLE tasks ADD COLUMN rubric TEXT NOT NULL DEFAULT ''")
+            db.execSQL("ALTER TABLE attempts ADD COLUMN verdict_json TEXT")
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS diagnostics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    profile_id INTEGER NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    tasks_done INTEGER NOT NULL DEFAULT 0,
+                    score REAL NOT NULL DEFAULT 0,
+                    sections_json TEXT NOT NULL DEFAULT '[]'
+                )""",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_attempts_pending ON attempts(profile_id, status)")
+        }
         // v4 (13.11.2026): задания банка ФИПИ — проверенный контент, а не черновики.
         if (oldVersion < 4) {
             db.execSQL("UPDATE tasks SET trusted = 1 WHERE origin = 'bank'")

@@ -36,10 +36,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import ru.tolmachev.ogetrainer.Graph
+import ru.tolmachev.ogetrainer.data.llm.LocalLlm
+import ru.tolmachev.ogetrainer.data.study.AttemptResult
+import ru.tolmachev.ogetrainer.data.study.StudyRepository
+import ru.tolmachev.ogetrainer.domain.Difficulty
+import ru.tolmachev.ogetrainer.domain.Mastery
+import ru.tolmachev.ogetrainer.domain.Rubric
+import ru.tolmachev.ogetrainer.ui.components.ChoiceRow
+import ru.tolmachev.ogetrainer.ui.components.GhostButton
+import ru.tolmachev.ogetrainer.ui.components.PrimaryButton
+import androidx.compose.ui.platform.LocalContext
 import ru.tolmachev.ogetrainer.data.db.Profile
 import ru.tolmachev.ogetrainer.data.db.TopicRow
-import ru.tolmachev.ogetrainer.domain.Mastery
 import ru.tolmachev.ogetrainer.ui.components.Card
 import ru.tolmachev.ogetrainer.ui.components.MarkdownView
 import ru.tolmachev.ogetrainer.ui.components.TopBar
@@ -142,6 +155,7 @@ fun TopicScreen(
                 }
             } else {
                 TopicContent(
+                    profile = profile,
                     topic = selected,
                     tab = tab,
                     onTab = { tab = it },
@@ -157,6 +171,7 @@ fun TopicScreen(
 
 @Composable
 private fun TopicContent(
+    profile: ru.tolmachev.ogetrainer.data.db.Profile,
     topic: TopicRow?,
     tab: Int,
     onTab: (Int) -> Unit,
@@ -193,7 +208,7 @@ private fun TopicContent(
         TabRow(tab, onTab)
         when (tab) {
             0 -> TheoryPane(topic, theoryTitle, theory, dark, onOpenTopics)
-            else -> PracticePane(topic, onOpenTopics)
+            else -> PracticePane(profile, topic, onOpenTopics)
         }
     }
 }
@@ -278,34 +293,196 @@ private fun TheoryPane(
 }
 
 @Composable
-private fun PracticePane(topic: TopicRow, onOpenTopics: () -> Unit) {
+private fun PracticePane(
+    profile: ru.tolmachev.ogetrainer.data.db.Profile,
+    topic: TopicRow,
+    onOpenTopics: () -> Unit,
+) {
     val colors = LocalOgeColors.current
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var mode by remember(topic.code) { mutableStateOf("Короткие") }
+    var task by remember(topic.code) { mutableStateOf<ru.tolmachev.ogetrainer.data.db.TaskItem?>(null) }
+    var answer by remember(topic.code) { mutableStateOf("") }
+    var result by remember(topic.code) { mutableStateOf<StudyRepository.AttemptResult?>(null) }
+    var pendingMessage by remember(topic.code) { mutableStateOf<String?>(null) }
+    var busy by remember(topic.code) { mutableStateOf(false) }
     var shortCount by remember(topic.code) { mutableStateOf(-1) }
-    LaunchedEffect(topic.code) {
-        shortCount = Graph.study.countTasks(topic.code, "short")
+
+    suspend fun loadNext(type: String) {
+        task = Graph.study.pickTask(profile.id, topic.code, type)
+        answer = ""
+        result = null
+        pendingMessage = null
     }
+
+    LaunchedEffect(topic.code, mode) {
+        shortCount = Graph.study.countTasks(topic.code, "short")
+        loadNext(if (mode == "Короткие") "short" else "detailed")
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Space.x2),
     ) {
+        ChoiceRow(
+            options = listOf("Короткие", "Письменные"),
+            selected = mode,
+            onSelect = { mode = it },
+        )
+
         Card {
             Column(verticalArrangement = Arrangement.spacedBy(Space.x1_5)) {
-                Text(
-                    "В банке по теме: ${if (shortCount < 0) "…" else shortCount} задач с кратким ответом",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text,
-                )
-                Text(
-                    "Выдача задачи, локальная проверка и разбор — этап 2 плана.",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.muted,
-                )
+                val current = task
+                if (current == null) {
+                    Text(
+                        if (shortCount < 0) "Загружаем задание…" else "В этой теме нет заданий выбранного типа",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.muted,
+                    )
+                } else {
+                    Text(
+                        "Задание · сложность ${Difficulty.label(Difficulty.of(current.origin))}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.muted,
+                    )
+                    MarkdownView(
+                        markdown = ru.tolmachev.ogetrainer.ui.components.MathText.forKatex(current.prompt),
+                        dark = androidx.compose.foundation.isSystemInDarkTheme(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
+
+        val current = task
+        if (current != null && result == null && pendingMessage == null) {
+            Field(
+                label = if (mode == "Короткие") "Ответ" else "Развёрнутый ответ",
+                value = answer,
+                onValueChange = { answer = it },
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
+                PrimaryButton(
+                    text = if (busy) "Проверяем…" else "Ответить",
+                    enabled = !busy && answer.isNotBlank(),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    busy = true
+                    scope.launch {
+                        result = if (mode == "Короткие") {
+                            Graph.study.submitShortAnswer(profile.id, current, answer)
+                        } else {
+                            null
+                        }
+                        if (mode != "Короткие") {
+                            val criteria = Rubric.parseStored(
+                                current.rubricOrDefault(),
+                                Rubric.forType(current.type, current.maxPoints),
+                            )
+                            val localModel = Graph.settings.localModel.value?.let {
+                                ru.tolmachev.ogetrainer.data.models.ModelCatalog.byId(it)
+                            }
+                            val verdict = when {
+                                localModel != null && LocalLlm.isLoaded ->
+                                    Graph.answerChecker.checkLocal(
+                                        context, localModel, current, answer, criteria,
+                                    ).getOrNull()
+                                Graph.provider.hasKey() ->
+                                    Graph.answerChecker.checkCloud(current, answer, criteria).getOrNull()
+                                else -> null
+                            }
+                            val points = verdict?.score?.toInt() ?: 0
+                            Graph.study.submitDetailedAnswer(
+                                profileId = profile.id,
+                                task = current,
+                                answerText = answer,
+                                suggestedPoints = points,
+                                checkedBy = verdict?.source ?: "none",
+                                verdictJson = verdict?.let {
+                                    org.json.JSONObject().apply {
+                                        put("score", it.score)
+                                        put("max_score", it.maxScore)
+                                        put("confidence", it.confidence)
+                                        put("summary", it.summary)
+                                        put("source", it.source)
+                                        put(
+                                            "criteria",
+                                            org.json.JSONArray().apply {
+                                                it.criteria.forEach { criterion ->
+                                                    put(
+                                                        org.json.JSONObject().apply {
+                                                            put("id", criterion.id)
+                                                            put("title", criterion.title)
+                                                            put("met", criterion.met)
+                                                            put("comment", criterion.comment)
+                                                        },
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }.toString()
+                                },
+                            )
+                            pendingMessage = if (verdict != null) {
+                                "Отправлено на проверку. Предварительно: ${verdict.score.toInt()} из ${current.maxPoints}, " +
+                                    "уверенность ${(verdict.confidence * 100).toInt()} %. Окончательно подтвердит родитель или админ."
+                            } else {
+                                "Отправлено на проверку. Модель не дала вердикта — оценит родитель или админ."
+                            }
+                        }
+                        busy = false
+                    }
+                }
+                GhostButton(text = "Пропустить", enabled = !busy) {
+                    scope.launch { loadNext(if (mode == "Короткие") "short" else "detailed") }
+                }
+            }
+        }
+
+        result?.let { res ->
+            Card {
+                Column(verticalArrangement = Arrangement.spacedBy(Space.x1_5)) {
+                    Text(
+                        if (res.correct) "Верно" else "Неверно",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (res.correct) colors.okText else colors.badText,
+                    )
+                    Text(
+                        "Балл ${res.points} из ${res.maxPoints} · освоение темы " +
+                            "${(res.masteryAfter * 100).toInt()} % · " +
+                            Mastery.statusLabel(res.masteryAfter, res.attemptsAfter ?: 0),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.muted,
+                    )
+                    MarkdownView(
+                        markdown = ru.tolmachev.ogetrainer.ui.components.MathText.forKatex(res.feedback),
+                        dark = androidx.compose.foundation.isSystemInDarkTheme(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+            PrimaryButton(text = "Следующее задание") {
+                scope.launch { loadNext(if (mode == "Короткие") "short" else "detailed") }
+            }
+        }
+
+        pendingMessage?.let { message ->
+            Card {
+                Column(verticalArrangement = Arrangement.spacedBy(Space.x1_5)) {
+                    Text("Ожидает проверки", style = MaterialTheme.typography.titleSmall)
+                    Text(message, style = MaterialTheme.typography.bodyMedium, color = colors.muted)
+                }
+            }
+            PrimaryButton(text = "Следующее задание") {
+                scope.launch { loadNext(if (mode == "Короткие") "short" else "detailed") }
+            }
+        }
+
         Text(
             text = "← Другая тема",
             style = MaterialTheme.typography.labelLarge,
-            color = OgeColors.Accent,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .clickable { onOpenTopics() }
                 .padding(vertical = Space.x2),
