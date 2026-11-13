@@ -53,6 +53,7 @@ fun GenerateDialog(
     var topic by remember { mutableStateOf<Pair<String, String>?>(null) }
     var count by remember { mutableStateOf("5") }
     var grade by remember { mutableStateOf(0) }
+    var gradeChosen by remember { mutableStateOf(false) }
     var providerReady by remember { mutableStateOf(false) }
     var mode by remember { mutableStateOf("Локально") }
     var deviceModelId by remember { mutableStateOf<String?>(null) }
@@ -66,15 +67,15 @@ fun GenerateDialog(
         providerReady = Graph.provider.hasKey() && Graph.provider.load().baseUrl.isNotBlank()
         val all = Graph.bank.subjects()
         val program = Graph.profiles.programOf(profile.id)
-        grade = program?.first ?: 9
+        if (!gradeChosen) grade = program?.first ?: 9
         val allowed = program?.third?.toSet().orEmpty()
         subjects = if (allowed.isEmpty()) all else all.filter { it.first in allowed }
         subject = subjects.firstOrNull()?.first
     }
 
-    LaunchedEffect(subject) {
+    LaunchedEffect(subject, grade) {
         val code = subject ?: return@LaunchedEffect
-        topics = Graph.bank.topicsOf(code)
+        topics = Graph.bank.topicsOf(code, grade)
         topic = topics.firstOrNull()
     }
 
@@ -128,8 +129,18 @@ fun GenerateDialog(
                         color = colors.muted,
                     )
                 } else {
+                    SectionLabel("КЛАСС")
+                    ChoiceRow(
+                        options = listOf("5", "6", "7", "8", "9"),
+                        selected = grade.toString(),
+                        onSelect = {
+                            gradeChosen = true
+                            grade = it.toInt()
+                        },
+                    )
                     Text(
-                        "$grade класс · ${subjects.size} предметов в программе",
+                        "Один и тот же предмет в разных классах — разный контент: темы и задания " +
+                            "подбираются по классу, в банке они лежат отдельными группами.",
                         style = MaterialTheme.typography.labelMedium,
                         color = colors.muted,
                     )
@@ -211,6 +222,7 @@ fun GenerateDialog(
                                     subjectCode = subjectCode,
                                     topicCode = currentTopic.first,
                                     topicTitle = currentTopic.second,
+                                    grade = grade,
                                     count = wanted,
                                 )
                                 busy = false

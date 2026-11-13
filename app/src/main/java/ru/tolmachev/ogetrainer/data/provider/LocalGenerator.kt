@@ -23,6 +23,7 @@ class LocalGenerator(private val db: OgeDatabase) {
         subjectCode: String,
         topicCode: String,
         topicTitle: String,
+        grade: Int,
         count: Int,
     ): Result<Batch> = withContext(Dispatchers.IO) {
         val drafts = LocalTemplates.drafts(subjectCode, topicTitle, count)
@@ -48,6 +49,9 @@ class LocalGenerator(private val db: OgeDatabase) {
                         put("solution", draft.solution)
                         put("max_points", 1)
                         put("trusted", 1)
+                        // Класс задаётся при генерации: один и тот же предмет в 5 и 9 классе
+                        // даёт разный контент, и в банке он лежит раздельно.
+                        put("grade", grade)
                         put("origin", "local:${draft.difficulty}")
                         put("content_hash", hash)
                     },

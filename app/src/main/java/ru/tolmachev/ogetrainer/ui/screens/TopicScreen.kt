@@ -532,6 +532,15 @@ private fun TopicNode(topic: TopicRow, selected: Boolean, child: Boolean, onClic
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        // Раздел верхнего уровня подписываем классом: 5 класс, 9 класс (ОГЭ).
+        if (!child) {
+            Text(
+                text = "${topic.grade} класс",
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.muted,
+                modifier = Modifier.padding(end = Space.x1),
+            )
+        }
         Text(
             text = if (Mastery.isCompleted(topic.mastery)) "✓" else "${(topic.mastery * 100).toInt()}%",
             style = MaterialTheme.typography.labelMedium,

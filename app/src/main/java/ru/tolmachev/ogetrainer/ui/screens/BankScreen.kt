@@ -71,6 +71,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
     var tasks by remember { mutableStateOf<List<BankRepository.BankTask>>(emptyList()) }
 
     var filter by remember { mutableStateOf("Все") }
+    var gradeFilter by remember { mutableStateOf<Int?>(null) }
     var subject by remember { mutableStateOf<Pair<String, String>?>(null) }
     var topic by remember { mutableStateOf<BankRepository.TopicBankRow?>(null) }
     var generateFor by remember { mutableStateOf<BankRepository.TopicBankRow?>(null) }
@@ -88,13 +89,15 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
     fun reloadAll() {
         scope.launch {
             summary = Graph.bank.summary()
-            subjects = Graph.bank.subjectRows(originFilter)
-            subject?.let { selected -> topics = Graph.bank.topicRows(selected.first, originFilter) }
+            subjects = Graph.bank.subjectRows(originFilter, gradeFilter)
+            subject?.let { selected ->
+                topics = Graph.bank.topicRows(selected.first, originFilter, gradeFilter)
+            }
             topic?.let { selected -> tasks = Graph.bank.tasksOf(selected.code, originFilter) }
         }
     }
 
-    LaunchedEffect(filter, subject, topic, reload) { reloadAll() }
+    LaunchedEffect(filter, gradeFilter, subject, topic, reload) { reloadAll() }
 
     Column(Modifier.fillMaxSize()) {
         TopBar(
@@ -151,6 +154,7 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
             }
             if (topic == null) {
                 item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
                     // Один компактный фильтр M3: чип с выпадающим списком источников.
                     Box {
                         var menuOpen by remember { mutableStateOf(false) }
@@ -185,6 +189,39 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                                 )
                             }
                         }
+                    }
+                    // Класс: один предмет в разных классах — разный контент.
+                    Box {
+                        var gradeMenu by remember { mutableStateOf(false) }
+                        FilterChip(
+                            selected = gradeFilter != null,
+                            onClick = { gradeMenu = true },
+                            label = {
+                                Text(
+                                    "Класс: " + (gradeFilter?.let { "$it" } ?: "Все"),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    androidx.compose.material.icons.Icons.Filled.ArrowDropDown,
+                                    contentDescription = "Выбрать класс",
+                                )
+                            },
+                            shape = MaterialTheme.shapes.small,
+                        )
+                        DropdownMenu(expanded = gradeMenu, onDismissRequest = { gradeMenu = false }) {
+                            listOf<Int?>(null, 5, 6, 7, 8, 9).forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option?.let { "$it класс" } ?: "Все классы") },
+                                    onClick = {
+                                        gradeFilter = option
+                                        gradeMenu = false
+                                    },
+                                )
+                            }
+                        }
+                    }
                     }
                 }
             }
@@ -268,34 +305,40 @@ fun BankScreen(onBack: () -> Unit, onOpenProvider: () -> Unit) {
                 }
 
                 else -> {
-                    items(topics, key = { it.code }) { row ->
-                        ListItem(
-                            headlineContent = {
-                                Text(row.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                            },
-                            supportingContent = {
-                                Text(
-                                    buildString {
-                                        append(plural(row.tasks, "задача", "задачи", "задач"))
-                                        if (row.drafts > 0) append(" · черновиков ${row.drafts}")
-                                        if (!row.hasTheory) append(" · нет конспекта")
-                                    },
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            },
-                            trailingContent = {
-                                IconButton(onClick = { generateFor = row }) {
-                                    Icon(
-                                        Icons.Filled.Add,
-                                        contentDescription = "Сгенерировать задания",
-                                        tint = MaterialTheme.colorScheme.primary,
+                    // Темы группируются по классу: один предмет в 5 и 9 классе — разный контент.
+                    topics.groupBy { it.grade }.forEach { (grade, rows) ->
+                        item(key = "grade-$grade") {
+                            SectionLabel("$grade класс · ${plural(rows.size, "тема", "темы", "тем")}")
+                        }
+                        items(rows, key = { it.code }) { row ->
+                            ListItem(
+                                headlineContent = {
+                                    Text(row.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        buildString {
+                                            append(plural(row.tasks, "задача", "задачи", "задач"))
+                                            if (row.drafts > 0) append(" · черновиков ${row.drafts}")
+                                            if (!row.hasTheory) append(" · нет конспекта")
+                                        },
+                                        style = MaterialTheme.typography.labelMedium,
                                     )
-                                }
-                            },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable { topic = row },
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                },
+                                trailingContent = {
+                                    IconButton(onClick = { generateFor = row }) {
+                                        Icon(
+                                            Icons.Filled.Add,
+                                            contentDescription = "Сгенерировать задания",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                        )
+                                    }
+                                },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                modifier = Modifier.clickable { topic = row },
+                            )
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        }
                     }
                 }
             }
@@ -361,7 +404,7 @@ private fun TaskCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    sourceLabel(task.origin),
+                    sourceLabel(task.origin) + " · ${task.grade} класс",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
@@ -486,6 +529,7 @@ private fun BankGenerateDialog(
                                 subjectCode = subjectCodeFor(topic),
                                 topicCode = topic.code,
                                 topicTitle = topic.title,
+                                grade = topic.grade,
                                 count = wanted,
                             ).map { "добавлено ${it.added}" }
                         } else {
@@ -494,7 +538,7 @@ private fun BankGenerateDialog(
                                 subjectTitle = subjectTitle,
                                 topicCode = topic.code,
                                 topicTitle = topic.title,
-                                grade = 9,
+                                grade = topic.grade,
                                 count = wanted,
                             ).map { "добавлено ${it.added}, отклонено ${it.rejected}" }
                         }

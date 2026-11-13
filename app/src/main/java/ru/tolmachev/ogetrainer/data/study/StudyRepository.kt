@@ -134,20 +134,24 @@ class StudyRepository(private val db: OgeDatabase) {
             database.rawQuery(
                 """
                 SELECT t.code AS code, t.subject_code AS subject_code, t.parent_code AS parent_code,
-                       t.title AS title, t.pos AS pos,
+                       t.title AS title, t.pos AS pos, t.grade AS grade,
                        COALESCE((SELECT m.mastery FROM topic_mastery m
                                  WHERE m.topic_code = t.code AND m.profile_id = ?), 0.0) AS mastery,
                        COALESCE((SELECT m.attempts_count FROM topic_mastery m
                                  WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS attempts,
                        COALESCE((SELECT m.last_attempt_at FROM topic_mastery m
                                  WHERE m.topic_code = t.code AND m.profile_id = ?), 0) AS last_at
-                FROM topics t WHERE t.subject_code = ? ORDER BY t.pos
+                FROM topics t
+                WHERE t.subject_code = ?
+                  AND t.grade <= COALESCE((SELECT MAX(p.grade) FROM programs p WHERE p.profile_id = ?), 9)
+                ORDER BY t.grade, t.pos
                 """.trimIndent(),
                 arrayOf(
                     profileId.toString(),
                     profileId.toString(),
                     profileId.toString(),
                     subjectCode,
+                    profileId.toString(),
                 ),
             ).mapRows { cursor ->
                 TopicRow(
@@ -156,6 +160,7 @@ class StudyRepository(private val db: OgeDatabase) {
                     parentCode = cursor.nullableStringOf("parent_code"),
                     title = cursor.stringOf("title"),
                     pos = cursor.intOf("pos"),
+                    grade = cursor.intOf("grade"),
                     mastery = Mastery.decay(cursor.doubleOf("mastery"), cursor.longOf("last_at"), now),
                     attempts = cursor.intOf("attempts"),
                 )
@@ -206,22 +211,20 @@ class StudyRepository(private val db: OgeDatabase) {
                     }.firstOrNull()
 
                 val placeholders = types.joinToString(",") { "'" + it + "'" }
+                // Только принятые задания (trusted = 1) и не выше класса профиля.
+                // Порядок подстановки: тема, класс профиля, профиль (исключение решённых), сложность.
                 val base =
-                    "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders)" +
+                    "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders) AND trusted = 1" +
+                        " AND grade <= COALESCE((SELECT MAX(p.grade) FROM programs p WHERE p.profile_id = ?), 9)" +
                         " AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)"
-                val difficultyLike = arrayOf("local:%", "llm:%")
+                val args = arrayOf(topicCode, profileId.toString(), profileId.toString())
 
-                // 1) нерешённая задача нужной сложности
+                // 1) нерешённая задача нужной сложности, 2) любая нерешённая принятая
                 query(
-                    "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY trusted DESC, id LIMIT 1",
-                    arrayOf(topicCode, profileId.toString()) + difficultyLike,
+                    "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY id LIMIT 1",
+                    args + arrayOf("local:%", "llm:%"),
                 )?.takeIf { Difficulty.of(it.origin) == target }
-                    ?: query("$base ORDER BY trusted DESC, id LIMIT 1", arrayOf(topicCode, profileId.toString()))
-                    ?: query(
-                        "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders) " +
-                            "ORDER BY trusted DESC, id LIMIT 1",
-                        arrayOf(topicCode),
-                    )
+                    ?: query("$base ORDER BY id LIMIT 1", args)
             }
         }
 
@@ -397,9 +400,10 @@ class StudyRepository(private val db: OgeDatabase) {
                         SELECT ps.subject_code FROM program_subjects ps
                         JOIN programs p ON p.id = ps.program_id WHERE p.profile_id = ?
                     )
-                    ORDER BY t.subject_code, COALESCE(t.parent_code, t.code), t.pos
+                      AND t.grade <= COALESCE((SELECT MAX(p.grade) FROM programs p WHERE p.profile_id = ?), 9)
+                    ORDER BY t.subject_code, t.grade, COALESCE(t.parent_code, t.code), t.pos
                     """.trimIndent(),
-                    arrayOf(profileId.toString()),
+                    arrayOf(profileId.toString(), profileId.toString()),
                 ).mapRows {
                     SectionTopic(
                         code = it.getString(0),

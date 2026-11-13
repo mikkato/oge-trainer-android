@@ -172,6 +172,7 @@ class LocalLlmGenerator(private val db: ru.tolmachev.ogetrainer.data.db.OgeDatab
                         put("solution", solution)
                         put("max_points", 1)
                         put("trusted", 0)
+                        put("grade", grade)
                         put("origin", "llm-local")
                         put("content_hash", hash)
                     },

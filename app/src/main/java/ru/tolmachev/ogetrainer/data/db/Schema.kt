@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 5
+    const val VERSION = 6
 
     val CREATE = listOf(
         """
@@ -53,7 +53,8 @@ object Schema {
             parent_code TEXT,
             title TEXT NOT NULL,
             pos INTEGER NOT NULL DEFAULT 0,
-            source TEXT NOT NULL DEFAULT 'fipi'
+            source TEXT NOT NULL DEFAULT 'fipi',
+            grade INTEGER NOT NULL DEFAULT 9
         )
         """,
         "CREATE INDEX IF NOT EXISTS idx_topics_subject ON topics(subject_code)",
@@ -78,6 +79,7 @@ object Schema {
             trusted INTEGER NOT NULL DEFAULT 0,
             origin TEXT NOT NULL DEFAULT 'bank',
             rubric TEXT NOT NULL DEFAULT '',
+            grade INTEGER NOT NULL DEFAULT 9,
             content_hash TEXT NOT NULL UNIQUE
         )
         """,
@@ -171,6 +173,8 @@ data class TopicRow(
     val parentCode: String?,
     val title: String,
     val pos: Int,
+    /** Класс, с которого тема изучается. */
+    val grade: Int = 9,
     val mastery: Double,
     /** Число попыток по теме: до трёх вывод об уровне не делается. */
     val attempts: Int = 0,

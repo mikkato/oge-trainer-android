@@ -1,0 +1,846 @@
+{
+ "version": "2025.1",
+ "note": "Темы по классам 5–8. Темы ОГЭ из topics.json относятся к 9 классу.",
+ "topics": [
+  {
+   "code": "math5",
+   "subject": "math",
+   "title": "Математика · 5 класс",
+   "grade": 5,
+   "parent": null,
+   "order": 1010
+  },
+  {
+   "code": "math5.natural",
+   "subject": "math",
+   "title": "Натуральные числа и действия с ними",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101001
+  },
+  {
+   "code": "math5.fractions",
+   "subject": "math",
+   "title": "Обыкновенные дроби",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101002
+  },
+  {
+   "code": "math5.decimals",
+   "subject": "math",
+   "title": "Десятичные дроби",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101003
+  },
+  {
+   "code": "math5.percent",
+   "subject": "math",
+   "title": "Проценты",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101004
+  },
+  {
+   "code": "math5.equations",
+   "subject": "math",
+   "title": "Уравнения",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101005
+  },
+  {
+   "code": "math5.geometry",
+   "subject": "math",
+   "title": "Геометрические фигуры и площади",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101006
+  },
+  {
+   "code": "math5.average",
+   "subject": "math",
+   "title": "Среднее арифметическое",
+   "grade": 5,
+   "parent": "math5",
+   "order": 101007
+  },
+  {
+   "code": "math6",
+   "subject": "math",
+   "title": "Математика · 6 класс",
+   "grade": 6,
+   "parent": null,
+   "order": 1020
+  },
+  {
+   "code": "math6.divisibility",
+   "subject": "math",
+   "title": "Делимость чисел, НОД и НОК",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102001
+  },
+  {
+   "code": "math6.fractions",
+   "subject": "math",
+   "title": "Действия с обыкновенными дробями",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102002
+  },
+  {
+   "code": "math6.ratio",
+   "subject": "math",
+   "title": "Отношения и пропорции",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102003
+  },
+  {
+   "code": "math6.integers",
+   "subject": "math",
+   "title": "Положительные и отрицательные числа",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102004
+  },
+  {
+   "code": "math6.line",
+   "subject": "math",
+   "title": "Координатная прямая",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102005
+  },
+  {
+   "code": "math6.equations",
+   "subject": "math",
+   "title": "Решение уравнений",
+   "grade": 6,
+   "parent": "math6",
+   "order": 102006
+  },
+  {
+   "code": "math7",
+   "subject": "math",
+   "title": "Математика · 7 класс",
+   "grade": 7,
+   "parent": null,
+   "order": 1030
+  },
+  {
+   "code": "math7.expressions",
+   "subject": "math",
+   "title": "Алгебраические выражения",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103001
+  },
+  {
+   "code": "math7.linear",
+   "subject": "math",
+   "title": "Линейные уравнения и системы",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103002
+  },
+  {
+   "code": "math7.function",
+   "subject": "math",
+   "title": "Линейная функция и график",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103003
+  },
+  {
+   "code": "math7.power",
+   "subject": "math",
+   "title": "Степень с натуральным показателем",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103004
+  },
+  {
+   "code": "math7.triangles",
+   "subject": "math",
+   "title": "Треугольники и признаки равенства",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103005
+  },
+  {
+   "code": "math7.stats",
+   "subject": "math",
+   "title": "Статистика и вероятность",
+   "grade": 7,
+   "parent": "math7",
+   "order": 103006
+  },
+  {
+   "code": "math8",
+   "subject": "math",
+   "title": "Математика · 8 класс",
+   "grade": 8,
+   "parent": null,
+   "order": 1040
+  },
+  {
+   "code": "math8.roots",
+   "subject": "math",
+   "title": "Квадратные корни",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104001
+  },
+  {
+   "code": "math8.quadratic",
+   "subject": "math",
+   "title": "Квадратные уравнения",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104002
+  },
+  {
+   "code": "math8.inequalities",
+   "subject": "math",
+   "title": "Неравенства",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104003
+  },
+  {
+   "code": "math8.parabola",
+   "subject": "math",
+   "title": "Квадратичная функция",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104004
+  },
+  {
+   "code": "math8.areas",
+   "subject": "math",
+   "title": "Площади и теорема Пифагора",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104005
+  },
+  {
+   "code": "math8.similar",
+   "subject": "math",
+   "title": "Подобие треугольников",
+   "grade": 8,
+   "parent": "math8",
+   "order": 104006
+  },
+  {
+   "code": "rus5",
+   "subject": "rus",
+   "title": "Русский язык · 5 класс",
+   "grade": 5,
+   "parent": null,
+   "order": 1050
+  },
+  {
+   "code": "rus5.phonetics",
+   "subject": "rus",
+   "title": "Фонетика и графика",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105001
+  },
+  {
+   "code": "rus5.lexis",
+   "subject": "rus",
+   "title": "Лексика",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105002
+  },
+  {
+   "code": "rus5.morphemics",
+   "subject": "rus",
+   "title": "Морфемика и словообразование",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105003
+  },
+  {
+   "code": "rus5.noun",
+   "subject": "rus",
+   "title": "Имя существительное",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105004
+  },
+  {
+   "code": "rus5.adjective",
+   "subject": "rus",
+   "title": "Имя прилагательное",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105005
+  },
+  {
+   "code": "rus5.verb",
+   "subject": "rus",
+   "title": "Глагол",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105006
+  },
+  {
+   "code": "rus5.roots",
+   "subject": "rus",
+   "title": "Правописание корней",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105007
+  },
+  {
+   "code": "rus5.homogeneous",
+   "subject": "rus",
+   "title": "Однородные члены предложения",
+   "grade": 5,
+   "parent": "rus5",
+   "order": 105008
+  },
+  {
+   "code": "rus6",
+   "subject": "rus",
+   "title": "Русский язык · 6 класс",
+   "grade": 6,
+   "parent": null,
+   "order": 1060
+  },
+  {
+   "code": "rus6.numeral",
+   "subject": "rus",
+   "title": "Имя числительное",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106001
+  },
+  {
+   "code": "rus6.pronoun",
+   "subject": "rus",
+   "title": "Местоимение",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106002
+  },
+  {
+   "code": "rus6.participle",
+   "subject": "rus",
+   "title": "Причастие",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106003
+  },
+  {
+   "code": "rus6.gerund",
+   "subject": "rus",
+   "title": "Деепричастие",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106004
+  },
+  {
+   "code": "rus6.prefixes",
+   "subject": "rus",
+   "title": "Правописание приставок",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106005
+  },
+  {
+   "code": "rus6.not",
+   "subject": "rus",
+   "title": "НЕ с существительными и прилагательными",
+   "grade": 6,
+   "parent": "rus6",
+   "order": 106006
+  },
+  {
+   "code": "rus7",
+   "subject": "rus",
+   "title": "Русский язык · 7 класс",
+   "grade": 7,
+   "parent": null,
+   "order": 1070
+  },
+  {
+   "code": "rus7.adverb",
+   "subject": "rus",
+   "title": "Наречие и категория состояния",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107001
+  },
+  {
+   "code": "rus7.preposition",
+   "subject": "rus",
+   "title": "Предлог",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107002
+  },
+  {
+   "code": "rus7.conjunction",
+   "subject": "rus",
+   "title": "Союз",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107003
+  },
+  {
+   "code": "rus7.particle",
+   "subject": "rus",
+   "title": "Частица",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107004
+  },
+  {
+   "code": "rus7.neither",
+   "subject": "rus",
+   "title": "Правописание НЕ и НИ",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107005
+  },
+  {
+   "code": "rus7.detached",
+   "subject": "rus",
+   "title": "Обособленные члены предложения",
+   "grade": 7,
+   "parent": "rus7",
+   "order": 107006
+  },
+  {
+   "code": "rus8",
+   "subject": "rus",
+   "title": "Русский язык · 8 класс",
+   "grade": 8,
+   "parent": null,
+   "order": 1080
+  },
+  {
+   "code": "rus8.two_part",
+   "subject": "rus",
+   "title": "Двусоставные предложения",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108001
+  },
+  {
+   "code": "rus8.one_part",
+   "subject": "rus",
+   "title": "Односоставные предложения",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108002
+  },
+  {
+   "code": "rus8.minor",
+   "subject": "rus",
+   "title": "Второстепенные члены предложения",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108003
+  },
+  {
+   "code": "rus8.homogeneous",
+   "subject": "rus",
+   "title": "Однородные члены",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108004
+  },
+  {
+   "code": "rus8.definitions",
+   "subject": "rus",
+   "title": "Обособленные определения и обстоятельства",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108005
+  },
+  {
+   "code": "rus8.intro",
+   "subject": "rus",
+   "title": "Вводные слова и обращения",
+   "grade": 8,
+   "parent": "rus8",
+   "order": 108006
+  },
+  {
+   "code": "geo5",
+   "subject": "geo",
+   "title": "География · 5 класс",
+   "grade": 5,
+   "parent": null,
+   "order": 1090
+  },
+  {
+   "code": "geo5.earth",
+   "subject": "geo",
+   "title": "Земля во Вселенной",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109001
+  },
+  {
+   "code": "geo5.lithosphere",
+   "subject": "geo",
+   "title": "Литосфера",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109002
+  },
+  {
+   "code": "geo5.hydrosphere",
+   "subject": "geo",
+   "title": "Гидросфера",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109003
+  },
+  {
+   "code": "geo5.atmosphere",
+   "subject": "geo",
+   "title": "Атмосфера",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109004
+  },
+  {
+   "code": "geo5.biosphere",
+   "subject": "geo",
+   "title": "Биосфера",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109005
+  },
+  {
+   "code": "geo5.coordinates",
+   "subject": "geo",
+   "title": "Географические координаты",
+   "grade": 5,
+   "parent": "geo5",
+   "order": 109006
+  },
+  {
+   "code": "geo6",
+   "subject": "geo",
+   "title": "География · 6 класс",
+   "grade": 6,
+   "parent": null,
+   "order": 1100
+  },
+  {
+   "code": "geo6.map",
+   "subject": "geo",
+   "title": "План и карта, масштаб",
+   "grade": 6,
+   "parent": "geo6",
+   "order": 110001
+  },
+  {
+   "code": "geo6.weather",
+   "subject": "geo",
+   "title": "Погода и климат",
+   "grade": 6,
+   "parent": "geo6",
+   "order": 110002
+  },
+  {
+   "code": "geo6.waters",
+   "subject": "geo",
+   "title": "Реки и озёра",
+   "grade": 6,
+   "parent": "geo6",
+   "order": 110003
+  },
+  {
+   "code": "geo6.population",
+   "subject": "geo",
+   "title": "Население Земли",
+   "grade": 6,
+   "parent": "geo6",
+   "order": 110004
+  },
+  {
+   "code": "geo7",
+   "subject": "geo",
+   "title": "География · 7 класс",
+   "grade": 7,
+   "parent": null,
+   "order": 1110
+  },
+  {
+   "code": "geo7.continents",
+   "subject": "geo",
+   "title": "Материки и океаны",
+   "grade": 7,
+   "parent": "geo7",
+   "order": 111001
+  },
+  {
+   "code": "geo7.climate",
+   "subject": "geo",
+   "title": "Климатические пояса",
+   "grade": 7,
+   "parent": "geo7",
+   "order": 111002
+  },
+  {
+   "code": "geo7.zones",
+   "subject": "geo",
+   "title": "Природные зоны",
+   "grade": 7,
+   "parent": "geo7",
+   "order": 111003
+  },
+  {
+   "code": "geo7.countries",
+   "subject": "geo",
+   "title": "Население и страны",
+   "grade": 7,
+   "parent": "geo7",
+   "order": 111004
+  },
+  {
+   "code": "geo8",
+   "subject": "geo",
+   "title": "География · 8 класс",
+   "grade": 8,
+   "parent": null,
+   "order": 1120
+  },
+  {
+   "code": "geo8.position",
+   "subject": "geo",
+   "title": "Физико-географическое положение России",
+   "grade": 8,
+   "parent": "geo8",
+   "order": 112001
+  },
+  {
+   "code": "geo8.relief",
+   "subject": "geo",
+   "title": "Рельеф России",
+   "grade": 8,
+   "parent": "geo8",
+   "order": 112002
+  },
+  {
+   "code": "geo8.climate",
+   "subject": "geo",
+   "title": "Климат России",
+   "grade": 8,
+   "parent": "geo8",
+   "order": 112003
+  },
+  {
+   "code": "geo8.waters",
+   "subject": "geo",
+   "title": "Внутренние воды России",
+   "grade": 8,
+   "parent": "geo8",
+   "order": 112004
+  },
+  {
+   "code": "geo8.soils",
+   "subject": "geo",
+   "title": "Почвы и природные зоны России",
+   "grade": 8,
+   "parent": "geo8",
+   "order": 112005
+  },
+  {
+   "code": "bio5",
+   "subject": "bio",
+   "title": "Биология · 5 класс",
+   "grade": 5,
+   "parent": null,
+   "order": 1130
+  },
+  {
+   "code": "bio5.science",
+   "subject": "bio",
+   "title": "Биология как наука",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113001
+  },
+  {
+   "code": "bio5.cell",
+   "subject": "bio",
+   "title": "Клетка",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113002
+  },
+  {
+   "code": "bio5.kingdoms",
+   "subject": "bio",
+   "title": "Царства живой природы",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113003
+  },
+  {
+   "code": "bio5.plants",
+   "subject": "bio",
+   "title": "Растения",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113004
+  },
+  {
+   "code": "bio5.animals",
+   "subject": "bio",
+   "title": "Животные",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113005
+  },
+  {
+   "code": "bio5.fungi",
+   "subject": "bio",
+   "title": "Грибы и бактерии",
+   "grade": 5,
+   "parent": "bio5",
+   "order": 113006
+  },
+  {
+   "code": "bio6",
+   "subject": "bio",
+   "title": "Биология · 6 класс",
+   "grade": 6,
+   "parent": null,
+   "order": 1140
+  },
+  {
+   "code": "bio6.plant_structure",
+   "subject": "bio",
+   "title": "Строение растений",
+   "grade": 6,
+   "parent": "bio6",
+   "order": 114001
+  },
+  {
+   "code": "bio6.organs",
+   "subject": "bio",
+   "title": "Органы растений",
+   "grade": 6,
+   "parent": "bio6",
+   "order": 114002
+  },
+  {
+   "code": "bio6.photosynthesis",
+   "subject": "bio",
+   "title": "Фотосинтез",
+   "grade": 6,
+   "parent": "bio6",
+   "order": 114003
+  },
+  {
+   "code": "bio6.reproduction",
+   "subject": "bio",
+   "title": "Размножение растений",
+   "grade": 6,
+   "parent": "bio6",
+   "order": 114004
+  },
+  {
+   "code": "bio7",
+   "subject": "bio",
+   "title": "Биология · 7 класс",
+   "grade": 7,
+   "parent": null,
+   "order": 1150
+  },
+  {
+   "code": "bio7.systematics",
+   "subject": "bio",
+   "title": "Систематика животных",
+   "grade": 7,
+   "parent": "bio7",
+   "order": 115001
+  },
+  {
+   "code": "bio7.protozoa",
+   "subject": "bio",
+   "title": "Простейшие",
+   "grade": 7,
+   "parent": "bio7",
+   "order": 115002
+  },
+  {
+   "code": "bio7.invertebrates",
+   "subject": "bio",
+   "title": "Беспозвоночные",
+   "grade": 7,
+   "parent": "bio7",
+   "order": 115003
+  },
+  {
+   "code": "bio7.vertebrates",
+   "subject": "bio",
+   "title": "Позвоночные",
+   "grade": 7,
+   "parent": "bio7",
+   "order": 115004
+  },
+  {
+   "code": "bio8",
+   "subject": "bio",
+   "title": "Биология · 8 класс",
+   "grade": 8,
+   "parent": null,
+   "order": 1160
+  },
+  {
+   "code": "bio8.musculoskeletal",
+   "subject": "bio",
+   "title": "Опорно-двигательная система",
+   "grade": 8,
+   "parent": "bio8",
+   "order": 116001
+  },
+  {
+   "code": "bio8.circulation",
+   "subject": "bio",
+   "title": "Кровообращение",
+   "grade": 8,
+   "parent": "bio8",
+   "order": 116002
+  },
+  {
+   "code": "bio8.respiration",
+   "subject": "bio",
+   "title": "Дыхание",
+   "grade": 8,
+   "parent": "bio8",
+   "order": 116003
+  },
+  {
+   "code": "bio8.digestion",
+   "subject": "bio",
+   "title": "Пищеварение",
+   "grade": 8,
+   "parent": "bio8",
+   "order": 116004
+  },
+  {
+   "code": "bio8.nervous",
+   "subject": "bio",
+   "title": "Нервная система",
+   "grade": 8,
+   "parent": "bio8",
+   "order": 116005
+  }
+ ]
+}

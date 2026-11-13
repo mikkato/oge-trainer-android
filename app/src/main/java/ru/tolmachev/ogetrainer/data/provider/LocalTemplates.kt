@@ -45,6 +45,9 @@ object LocalTemplates {
 
         if (subjectCode.startsWith("math")) {
             when {
+                title.contains("дроб") -> list += { fractions() }
+                title.contains("натуральн") || title.contains("вычислен") -> list += { natural() }
+                title.contains("делимост") || title.contains("нод") || title.contains("нок") -> list += { divisibility() }
                 title.contains("прогресс") -> list += { arithmeticProgression() }
                 title.contains("процент") -> list += { percentage() }
                 title.contains("квадрат") || title.contains("уравнен") -> list += { linearEquation() }
@@ -127,6 +130,79 @@ object LocalTemplates {
             solution = "Скидка: $base · $percent / 100 = $discount; новая цена $base − $discount = $answer.",
             difficulty = 1,
         )
+    }
+
+
+    /** 5 класс: сложение и вычитание дробей с разными знаменателями. */
+    private fun fractions(): Draft {
+        val b = rnd.nextInt(2, 10)
+        var d = rnd.nextInt(2, 10)
+        if (d == b) d += 1
+        val a = rnd.nextInt(1, b)
+        val c = rnd.nextInt(1, d)
+        val num = a * d + c * b
+        val den = b * d
+        val g = gcd(num, den)
+        val sign = if (rnd.nextBoolean()) 1 else -1
+        val num2 = if (sign > 0) num else (a * d - c * b)
+        val g2 = gcd(num2, den)
+        val answer = if (sign > 0) "${num / g}/${den / g}" else "${num2 / g2}/${den / g2}"
+        return Draft(
+            prompt = "Вычислите $a/$b ${if (sign > 0) "+" else "−"} $c/$d. Ответ дайте обыкновенной дробью.",
+            answer = answer,
+            solution = "Приводим к общему знаменателю: $a/$b ${if (sign > 0) "+" else "−"} $c/$d = " +
+                "${num2}/$den = $answer.",
+            difficulty = 1,
+        )
+    }
+
+    /** 5 класс: порядок действий с натуральными числами. */
+    private fun natural(): Draft {
+        val a = rnd.nextInt(10, 60)
+        val b = rnd.nextInt(10, 60)
+        val c = rnd.nextInt(2, 9)
+        val answer = a + b * c
+        return Draft(
+            prompt = "Вычислите значение выражения: $a + $b · $c.",
+            answer = answer.toString(),
+            solution = "Умножение выполняется первым: $b · $c = ${b * c}; $a + ${b * c} = $answer.",
+            difficulty = 1,
+        )
+    }
+
+    /** 6 класс: НОД и НОК двух чисел. */
+    private fun divisibility(): Draft {
+        val a = rnd.nextInt(4, 24)
+        val b = rnd.nextInt(4, 24)
+        val wantGcd = rnd.nextBoolean()
+        val g = gcd(a, b)
+        val l = a / g * b
+        return if (wantGcd) {
+            Draft(
+                prompt = "Найдите наибольший общий делитель чисел $a и $b.",
+                answer = g.toString(),
+                solution = "Раскладываем на простые множители: НОД($a; $b) = $g.",
+                difficulty = 2,
+            )
+        } else {
+            Draft(
+                prompt = "Найдите наименьшее общее кратное чисел $a и $b.",
+                answer = l.toString(),
+                solution = "НОК = $a · $b / НОД = ${a * b} / $g = $l.",
+                difficulty = 2,
+            )
+        }
+    }
+
+    private fun gcd(x: Int, y: Int): Int {
+        var a = kotlin.math.abs(x)
+        var b = kotlin.math.abs(y)
+        while (b != 0) {
+            val t = b
+            b = a % b
+            a = t
+        }
+        return if (a == 0) 1 else a
     }
 
     private fun rectangleArea(): Draft {

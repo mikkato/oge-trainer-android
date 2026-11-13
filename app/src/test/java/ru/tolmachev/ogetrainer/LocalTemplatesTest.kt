@@ -92,4 +92,68 @@ class LocalTemplatesTest {
         assertTrue(LocalTemplates.drafts("bio", "Клетка", 5).isEmpty())
         assertTrue(LocalTemplates.supports("math", "Проценты"))
     }
+
+    @Test
+    fun `дроби складываются и сокращаются верно`() {
+        val regex = Regex("""Вычислите (\d+)/(\d+) ([+−]) (\d+)/(\d+)\.""")
+        var checked = 0
+        drafts("Обыкновенные дроби").forEach { draft ->
+            val match = regex.find(draft.prompt) ?: return@forEach
+            val a = match.groupValues[1].toInt()
+            val b = match.groupValues[2].toInt()
+            val sign = if (match.groupValues[3] == "−") -1 else 1
+            val c = match.groupValues[4].toInt()
+            val d = match.groupValues[5].toInt()
+            val expected = (a * d + sign * c * b).toDouble() / (b * d)
+            val parts = draft.answer.split("/")
+            val actual = parts[0].toInt().toDouble() / parts[1].toInt()
+            assertEquals("условие: ${draft.prompt}", expected, actual, 1e-9)
+            checked++
+        }
+        assertTrue("проверено $checked заданий", checked > 10)
+    }
+
+    @Test
+    fun `порядок действий с натуральными числами`() {
+        val regex = Regex("""Вычислите значение выражения: (\d+) \+ (\d+) · (\d+)\.""")
+        var checked = 0
+        drafts("Натуральные числа и действия с ними").forEach { draft ->
+            val match = regex.find(draft.prompt) ?: return@forEach
+            val a = match.groupValues[1].toInt()
+            val b = match.groupValues[2].toInt()
+            val c = match.groupValues[3].toInt()
+            assertEquals("условие: ${draft.prompt}", a + b * c, draft.answer.toInt())
+            checked++
+        }
+        assertTrue("проверено $checked заданий", checked > 10)
+    }
+
+    @Test
+    fun `нод и нок считаются верно`() {
+        val gcdRegex = Regex("""Найдите наибольший общий делитель чисел (\d+) и (\d+)\.""")
+        val lcmRegex = Regex("""Найдите наименьшее общее кратное чисел (\d+) и (\d+)\.""")
+        var checked = 0
+        drafts("Делимость чисел, НОД и НОК").forEach { draft ->
+            gcdRegex.find(draft.prompt)?.let { match ->
+                val a = match.groupValues[1].toInt()
+                val b = match.groupValues[2].toInt()
+                val g = draft.answer.toInt()
+                assertTrue("условие: ${draft.prompt}", a % g == 0 && b % g == 0)
+                // максимальность: НОД(a/g, b/g) должен быть 1
+                var x = a / g
+                var y = b / g
+                while (y != 0) { val t = y; y = x % y; x = t }
+                assertEquals("НОД не максимален: ${draft.prompt}", 1, x)
+                checked++
+            }
+            lcmRegex.find(draft.prompt)?.let { match ->
+                val a = match.groupValues[1].toInt()
+                val b = match.groupValues[2].toInt()
+                val l = draft.answer.toLong()
+                assertTrue("условие: ${draft.prompt}", l % a == 0L && l % b == 0L)
+                checked++
+            }
+        }
+        assertTrue("проверено $checked заданий", checked > 10)
+    }
 }

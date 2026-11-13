@@ -41,6 +41,12 @@ class OgeDatabase(context: Context) :
             )
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_attempts_pending ON attempts(profile_id, status)")
         }
+        // v6 (13.11.2026): уровень класса у тем и заданий. Темы банка — ОГЭ (9 класс),
+        // темы 5–8 классов приходят из assets/bank/grades.json при импорте.
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE topics ADD COLUMN grade INTEGER NOT NULL DEFAULT 9")
+            db.execSQL("ALTER TABLE tasks ADD COLUMN grade INTEGER NOT NULL DEFAULT 9")
+        }
         // v4 (13.11.2026): задания банка ФИПИ — проверенный контент, а не черновики.
         if (oldVersion < 4) {
             db.execSQL("UPDATE tasks SET trusted = 1 WHERE origin = 'bank'")

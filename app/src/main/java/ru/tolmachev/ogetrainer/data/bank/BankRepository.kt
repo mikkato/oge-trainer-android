@@ -53,6 +53,12 @@ class BankRepository(
         }
     }
 
+    /** Класс темы: по нему задача попадает в программу соответствующего класса. */
+    private fun SQLiteDatabase.gradeOfTopic(topicCode: String): Int =
+        rawQuery("SELECT grade FROM topics WHERE code = ?", arrayOf(topicCode)).use {
+            if (it.moveToFirst()) it.getInt(0) else 9
+        }
+
     private fun scalar(database: SQLiteDatabase, sql: String): Int =
         database.rawQuery(sql, null).use { if (it.moveToFirst()) it.getInt(0) else 0 }
 
@@ -67,6 +73,10 @@ class BankRepository(
         val topics = JSONArray(asset("topics.json"))
         val theories = JSONArray(asset("theories.json"))
         val tasks = JSONArray(asset("tasks.json"))
+        // Темы 5–8 классов: отдельный файл, импортируется всегда (он не входит в версию банка).
+        val gradeTopics = runCatching {
+            JSONArray(JSONObject(asset("grades.json")).getJSONArray("topics").toString())
+        }.getOrDefault(JSONArray())
 
         val previous = db.read { database ->
             database.rawQuery("SELECT value FROM sync_meta WHERE key = 'bank_stamp'", null)
@@ -87,6 +97,25 @@ class BankRepository(
                 )
             }
 
+            // Темы по классам — до тем ОГЭ, чтобы разделы 5–8 классов шли первыми.
+            (0 until gradeTopics.length()).forEach { index ->
+                val item = gradeTopics.getJSONObject(index)
+                database.insertWithOnConflict(
+                    "topics",
+                    null,
+                    ContentValues().apply {
+                        put("code", item.getString("code"))
+                        put("subject_code", item.getString("subject"))
+                        put("parent_code", item.optString("parent").ifBlank { null })
+                        put("title", item.getString("title"))
+                        put("pos", item.optInt("order"))
+                        put("source", "curriculum")
+                        put("grade", item.optInt("grade", 9))
+                    },
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
+
             topics.forEachObject { item ->
                 database.insertWithOnConflict(
                     "topics",
@@ -98,6 +127,7 @@ class BankRepository(
                         put("title", item.getString("title"))
                         put("pos", item.optInt("order"))
                         put("source", item.optString("source", "fipi"))
+                        put("grade", item.optInt("grade", 9))
                     },
                     SQLiteDatabase.CONFLICT_REPLACE,
                 )
@@ -131,6 +161,7 @@ class BankRepository(
                     put("max_points", item.optInt("max_points", 1))
                     put("trusted", if (item.optBoolean("trusted")) 1 else 0)
                     put("origin", "bank")
+                    put("grade", database.gradeOfTopic(topic))
                     put("content_hash", sha256("$type|$topic|$prompt"))
                 }
                 val id = database.insertWithOnConflict(
@@ -193,14 +224,17 @@ class BankRepository(
     }
 
     /** Темы предмета: код и название — для генерации контента. */
-    suspend fun topicsOf(subjectCode: String): List<Pair<String, String>> = withContext(Dispatchers.IO) {
-        db.read { database ->
-            database.rawQuery(
-                "SELECT code, title FROM topics WHERE subject_code = ? ORDER BY rowid",
-                arrayOf(subjectCode),
-            ).mapRows { it.getString(0) to it.getString(1) }
+    /** Темы предмета не выше класса программы — для генерации под нужный класс. */
+    suspend fun topicsOf(subjectCode: String, grade: Int = 9): List<Pair<String, String>> =
+        withContext(Dispatchers.IO) {
+            db.read { database ->
+                database.rawQuery(
+                    "SELECT code, title FROM topics WHERE subject_code = ? AND grade <= ? " +
+                        "ORDER BY grade, pos",
+                    arrayOf(subjectCode, grade.toString()),
+                ).mapRows { it.getString(0) to it.getString(1) }
+            }
         }
-    }
 
     suspend fun subjectTitle(subjectCode: String): String = withContext(Dispatchers.IO) {
         db.read { database ->
@@ -220,6 +254,8 @@ class BankRepository(
         val tasks: Int,
         val generated: Int,
         val drafts: Int,
+        /** Классы, по которым в банке есть темы, по возрастанию. */
+        val grades: List<Int> = emptyList(),
     )
 
     data class SubjectBankRow(
@@ -234,6 +270,8 @@ class BankRepository(
     data class TopicBankRow(
         val code: String,
         val title: String,
+        /** Класс темы: по нему контент группируется в банке. */
+        val grade: Int,
         val tasks: Int,
         val drafts: Int,
         val hasTheory: Boolean,
@@ -246,6 +284,7 @@ class BankRepository(
         val solution: String,
         val origin: String,
         val trusted: Boolean,
+        val grade: Int,
     )
 
     /** Сводка банка: сколько всего и сколько из этого сгенерировано и ждёт проверки. */
@@ -261,12 +300,15 @@ class BankRepository(
                 tasks = scalar("SELECT COUNT(*) FROM tasks"),
                 generated = scalar("SELECT COUNT(*) FROM tasks WHERE origin <> 'bank'"),
                 drafts = scalar("SELECT COUNT(*) FROM tasks WHERE trusted = 0 AND origin <> 'bank'"),
+                grades = database.rawQuery("SELECT DISTINCT grade FROM topics ORDER BY grade", null)
+                    .mapRows { it.getInt(0) },
             )
         }
     }
 
     /** Предметы со счётчиками тем, конспектов, задач и черновиков. */
-    suspend fun subjectRows(originFilter: String? = null): List<SubjectBankRow> = withContext(Dispatchers.IO) {
+    suspend fun subjectRows(originFilter: String? = null, grade: Int? = null): List<SubjectBankRow> =
+        withContext(Dispatchers.IO) {
         val originClause = when (originFilter) {
             null, "" -> ""
             "bank" -> " AND t.origin = 'bank'"
@@ -275,15 +317,17 @@ class BankRepository(
             "llm" -> " AND t.origin LIKE 'llm:d%'"
             else -> " AND t.origin = ?"
         }
+        val gradeTopicsClause = if (grade == null) "" else "AND tp.grade = $grade"
+        val gradeTasksClause = if (grade == null) "" else " AND t.grade = $grade"
         db.read { database ->
             database.rawQuery(
                 """
                 SELECT s.code, s.title,
-                       (SELECT COUNT(*) FROM topics tp WHERE tp.subject_code = s.code) AS topics,
+                       (SELECT COUNT(*) FROM topics tp WHERE tp.subject_code = s.code $gradeTopicsClause) AS topics,
                        (SELECT COUNT(*) FROM topics tp JOIN theories th ON th.topic_code = tp.code
-                         WHERE tp.subject_code = s.code) AS with_theory,
-                       (SELECT COUNT(*) FROM tasks t WHERE t.subject_code = s.code$originClause) AS tasks,
-                       (SELECT COUNT(*) FROM tasks t WHERE t.subject_code = s.code AND t.trusted = 0 AND t.origin <> 'bank'$originClause) AS drafts
+                         WHERE tp.subject_code = s.code $gradeTopicsClause) AS with_theory,
+                       (SELECT COUNT(*) FROM tasks t WHERE t.subject_code = s.code$originClause$gradeTasksClause) AS tasks,
+                       (SELECT COUNT(*) FROM tasks t WHERE t.subject_code = s.code AND t.trusted = 0 AND t.origin <> 'bank'$originClause$gradeTasksClause) AS drafts
                 FROM subjects s ORDER BY s.rowid
                 """.trimIndent(),
                 if (originFilter in setOf("bank", "local", "llm-local", "llm", null, "")) null
@@ -302,8 +346,11 @@ class BankRepository(
     }
 
     /** Темы предмета со счётчиками задач и признаком конспекта. */
-    suspend fun topicRows(subjectCode: String, originFilter: String? = null): List<TopicBankRow> =
-        withContext(Dispatchers.IO) {
+    suspend fun topicRows(
+        subjectCode: String,
+        originFilter: String? = null,
+        grade: Int? = null,
+    ): List<TopicBankRow> = withContext(Dispatchers.IO) {
             val originClause = when (originFilter) {
                 null, "" -> ""
                 "bank" -> " AND origin = 'bank'"
@@ -315,11 +362,13 @@ class BankRepository(
             db.read { database ->
                 database.rawQuery(
                     """
-                    SELECT tp.code, tp.title,
+                    SELECT tp.code, tp.title, tp.grade,
                            (SELECT COUNT(*) FROM tasks t WHERE t.topic_code = tp.code$originClause) AS tasks,
                            (SELECT COUNT(*) FROM tasks t WHERE t.topic_code = tp.code AND t.trusted = 0 AND t.origin <> 'bank'$originClause) AS drafts,
                            EXISTS(SELECT 1 FROM theories th WHERE th.topic_code = tp.code) AS has_theory
-                    FROM topics tp WHERE tp.subject_code = ? ORDER BY tp.pos, tp.rowid
+                    FROM topics tp
+                    WHERE tp.subject_code = ? ${if (grade == null) "" else "AND tp.grade = " + grade}
+                    ORDER BY tp.grade, tp.pos, tp.rowid
                     """.trimIndent(),
                     if (originFilter in setOf("bank", "local", "llm-local", "llm", null, "")) {
                         arrayOf(subjectCode)
@@ -330,9 +379,10 @@ class BankRepository(
                     TopicBankRow(
                         code = it.getString(0),
                         title = it.getString(1),
-                        tasks = it.getInt(2),
-                        drafts = it.getInt(3),
-                        hasTheory = it.getInt(4) == 1,
+                        grade = it.getInt(2),
+                        tasks = it.getInt(3),
+                        drafts = it.getInt(4),
+                        hasTheory = it.getInt(5) == 1,
                     )
                 }
             }
@@ -355,7 +405,7 @@ class BankRepository(
             }
             db.read { database ->
                 database.rawQuery(
-                    "SELECT id, prompt, answer, solution, origin, trusted FROM tasks " +
+                    "SELECT id, prompt, answer, solution, origin, trusted, grade FROM tasks " +
                         "WHERE ${conditions.joinToString(" AND ")} ORDER BY id DESC",
                     arrayOf(topicCode),
                 ).mapRows {
@@ -366,6 +416,7 @@ class BankRepository(
                         solution = it.getString(3),
                         origin = it.getString(4),
                         trusted = it.getInt(5) == 1,
+                        grade = it.getInt(6),
                     )
                 }
             }
