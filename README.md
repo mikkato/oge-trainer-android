@@ -26,3 +26,17 @@
 - Полная версия (админка, перенос данных, GitHub-релиз): 162 ч + 15 % = 186 ч ≈ 5,8 недели.
 - Первый гейт — рендеринг формул (WebView + офлайн-KaTeX против Markwon + jlatexmath), решается в первые три дня.
 - Распространение — GitHub Releases по тегу `vX.Y.Z`, установка APK по ссылке.
+
+## Дистрибуция
+
+Репозиторий: https://github.com/mikkato/oge-trainer-android (публичный).
+Релизы: https://github.com/mikkato/oge-trainer-android/releases/latest — там появятся APK и файл `sha256`.
+
+Сертификат подписи (сверяйте перед установкой):
+
+```
+SHA-256: C0:FB:3E:C3:B9:01:D9:1C:96:0D:1D:26:CE:D4:29:CC:C1:EA:45:4E:BE:73:38:A8:6D:F8:1A:85:D6:02:94:10
+Owner:   CN=Oge Trainer, O=Mikhail Tolmachev, L=Saint Petersburg, C=RU
+```
+
+Подробности — `docs/05-GITHUB-SETUP.md`. Ключ DeepSeek и keystore лежат в `.secrets/` (вне репозитория); секреты подписи уже заведены в GitHub.
