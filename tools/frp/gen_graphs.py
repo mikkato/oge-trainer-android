@@ -121,7 +121,9 @@ tasks = []
 def linear_batch(topic, n, subj="math"):
     # параметры подбираем так, чтобы узлы (0;b) и (1;k+b) гарантированно попадали
     # в видимое окно [-5;5]: иначе ученик не может считать ответ с рисунка
-    combos = [(k, b) for k in range(-4, 5) if k != 0 for b in range(-4, 5) if abs(k + b) <= 4]
+    # наклон оставляем некрутым (|k|<=2): при |k|>=3 прямая на сетке 10x10
+    # проходит слишком близко к вертикали и наклон нельзя уверенно сосчитать
+    combos = [(k, b) for k in (-2, -1, 1, 2) for b in range(-4, 5) if abs(k + b) <= 4]
     picked = random.sample(combos, min(n // 2, len(combos)))
     for i in range(n):
         k, b = picked[i % len(picked)]
@@ -175,6 +177,9 @@ hooke_batch(HOOK_TOPIC, 6)
 json.dump(tasks, open(os.path.join(HERE, "graph_tasks.json"), "w"), ensure_ascii=False, indent=0)
 
 # ---------- банковские задачи: media и честный trusted ----------
+if os.environ.get("SKIP_BANK"):
+    print("bank: пропущен (SKIP_BANK)")
+    sys.exit(0)
 tpath = os.path.join(REPO, "app/src/main/assets/bank/tasks.json")
 bank = json.load(open(tpath))
 fixed = untrusted = 0

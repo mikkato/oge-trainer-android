@@ -61,6 +61,15 @@ for p in json.load(open(SRC)):
             best[k] = (pr, p, v)
 
 plan = {}
+BAD_TAIL = re.compile(r"\b(и|в|с|на|от|для|к|по|а|но|или|за|над|под|из|до|при)$")
+def junk_title(t):
+    """Мусорные строки из таблиц ФРП: обрывки фраз, голые формулы, цифры."""
+    t = t.strip()
+    if len(t) < 4 or not re.search(r"[а-яё]{3}", t, re.I):
+        return True
+    if "=" in t or "\u22c5" in t or "\u00b7" in t:
+        return True
+    return bool(BAD_TAIL.search(t))
 for (key, g), (pr, p, v) in best.items():
     plan.setdefault(key, {})[g] = {
         "frp_id": p["id"],
@@ -70,7 +79,7 @@ for (key, g), (pr, p, v) in best.items():
             {"title": s["title"],
              "topics": [{"num": t["num"], "title": t["title"],
                          "hours": t["hours"], "kind": t["kind"]}
-                        for t in s["topics"]]}
+                        for t in s["topics"] if not junk_title(t["title"])]}
             for s in v["sections"]
         ],
     }

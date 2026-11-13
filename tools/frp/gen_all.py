@@ -16,7 +16,7 @@ os.makedirs(OUT, exist_ok=True)
 lock = threading.Lock()
 plan = json.load(open(os.path.join(HERE, "thematic_plan.json")))["plan"]
 
-SYSTEM = json.load(open(os.path.join(HERE, "gen_system.json")))["system"]
+SYSTEM = json.load(open(os.path.join(HERE, "gen_system_strict.json")))["system"]
 
 def one(topic, section, frp, grade, n=5):
     user = (f"Предмет: {frp}. Класс {grade}. Раздел: {section}. Тема: {topic}.\n"

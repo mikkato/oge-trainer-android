@@ -156,6 +156,33 @@ def parse_pdf(path, default_grade=5):
                     hours_m = re.match(r"^(\d{1,3})\b", c_hours or "")
                     is_num_row = cm["num"] is not None and RE_NUM.match(c_num)
                     is_plain_row = cm["num"] is None and c_name and hours_m
+                    # Фолбэк: pdfplumber рыхлит склеенные ячейки (строка с большим числом
+                    # колонок, чем в шапке) — данные уезжают с «картовых» индексов
+                    # (num на месте, name пустой — тема молча терялась).
+                    # Пересобираем строку структурно: num = первая короткая нумерация,
+                    # hours = первая чисто-числовая ячейка после названия,
+                    # name = текст между ними, content = самая длинная ячейка после часов.
+                    if (not is_num_row and not is_plain_row) or (is_num_row and not c_name):
+                        cells_c = [clean(c) for c in cells]
+                        num_idx = next((i for i, c in enumerate(cells_c)
+                                        if c and len(c) <= 6 and RE_NUM.match(c)), None)
+                        if num_idx is not None:
+                            tail = [i for i in range(num_idx + 1, len(cells_c))
+                                    if re.fullmatch(r"\d{1,3}", cells_c[i] or "")]
+                            hours_idx = tail[0] if tail else None
+                            name_parts = [cells_c[i] for i in range(num_idx + 1,
+                                          hours_idx if hours_idx is not None else len(cells_c))
+                                          if cells_c[i] and not re.fullmatch(r"\d{1,3}", cells_c[i])]
+                            joined_name = " ".join(name_parts).strip()
+                            if joined_name:
+                                c_num, c_name = cells_c[num_idx], joined_name
+                                c_hours = cells_c[hours_idx] if hours_idx is not None else ""
+                                rest = [cells_c[i] for i in range(num_idx + 1, len(cells_c))
+                                        if i != hours_idx and len(cells_c[i]) > len(joined_name)]
+                                c_content = max(rest, key=len) if rest else c_content
+                                hours_m = re.match(r"^(\d{1,3})\b", c_hours or "")
+                                is_num_row = cm["num"] is not None and RE_NUM.match(c_num)
+                                is_plain_row = cm["num"] is None and c_name and hours_m
                     if is_num_row or is_plain_row:
                         if RE_TOTAL.search(c_name):
                             cur_topic = None

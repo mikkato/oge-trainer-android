@@ -19,8 +19,8 @@ android {
         applicationId = "ru.tolmachev.ogetrainer"
         minSdk = 31
         targetSdk = 37
-        versionCode = 9
-        versionName = "0.6.0"
+        versionCode = 10
+        versionName = "0.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
