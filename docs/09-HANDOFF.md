@@ -1,4 +1,13 @@
-# 09 · HANDOFF — состояние на 14.11.2026 (0.6.1-alpha.3)
+# 09 · HANDOFF — состояние на 14.11.2026 (0.6.1-alpha.3, релиз собран)
+
+## Релиз v0.6.1-alpha.3
+- Release APK: `gh release v0.6.1-alpha.3`, 20,6 МБ (R8+shrink; debug ~64 МБ)
+- **Подпись изменена**: keystore v0.5.0-alpha.1 остался на прежней машине, создан новый
+  `tools/.secrets/ogetrainer-release.keystore` (PKCS12, keyPassword=storePassword —
+  иначе Gradle «final block not properly padded»). Копии: `~/ogetrainer-release.keystore`,
+  `~/ogetrainer-keystore.properties` (оба chmod 600, вне git).
+  Обновление поверх APK прежней подписи невозможно — только удаление + установка.
+- Сборка: `./gradlew :app:assembleRelease` (keystore.properties в корне, gitignored)
 
 ## Что нового с 0.6.0-alpha.2
 - Версия: `versionCode 10`, `versionName 0.6.1`
