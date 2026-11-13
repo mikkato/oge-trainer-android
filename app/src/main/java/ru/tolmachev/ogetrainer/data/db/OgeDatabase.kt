@@ -13,7 +13,22 @@ class OgeDatabase(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Миграции добавляются здесь по мере роста схемы (см. docs/01-TZ раздел 8).
+        // v2 (13.11.2026): встроенный администратор + сброс пользовательской базы.
+        // Столбец builtin добавляется, профили и все их данные удаляются; встроенный
+        // администратор создаётся репозиторием при первом обращении (ProfilesRepository).
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE profiles ADD COLUMN builtin INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("DELETE FROM attempts")
+            db.execSQL("DELETE FROM topic_mastery")
+            db.execSQL("DELETE FROM program_subjects")
+            db.execSQL("DELETE FROM programs")
+            db.execSQL("DELETE FROM profiles")
+        }
+        // v3 (13.11.2026): карточка профиля — возраст и фото.
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE profiles ADD COLUMN age INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE profiles ADD COLUMN photo_path TEXT")
+        }
     }
 
     override fun onConfigure(db: SQLiteDatabase) {

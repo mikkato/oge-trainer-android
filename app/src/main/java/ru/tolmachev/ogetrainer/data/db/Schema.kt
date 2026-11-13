@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 1
+    const val VERSION = 3
 
     val CREATE = listOf(
         """
@@ -19,7 +19,10 @@ object Schema {
             salt TEXT NOT NULL,
             hash TEXT NOT NULL,
             active INTEGER NOT NULL DEFAULT 1,
-            last_login_at INTEGER
+            last_login_at INTEGER,
+            builtin INTEGER NOT NULL DEFAULT 0,
+            age INTEGER NOT NULL DEFAULT 0,
+            photo_path TEXT
         )
         """,
         """
@@ -134,6 +137,12 @@ data class Profile(
     val hash: String,
     val active: Boolean,
     val lastLoginAt: Long?,
+    /** Встроенный администратор: нельзя удалить, переименовать или лишить роли. */
+    val builtin: Boolean = false,
+    /** Возраст в годах; 0 — не задан. */
+    val age: Int = 0,
+    /** Относительный путь к фото в filesDir (например, photos/<uuid>.jpg); null — нет фото. */
+    val photoPath: String? = null,
 )
 
 data class SubjectStat(

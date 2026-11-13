@@ -192,6 +192,33 @@ class BankRepository(
         }
     }
 
+    /** Темы предмета: код и название — для генерации контента. */
+    suspend fun topicsOf(subjectCode: String): List<Pair<String, String>> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                "SELECT code, title FROM topics WHERE subject_code = ? ORDER BY rowid",
+                arrayOf(subjectCode),
+            ).mapRows { it.getString(0) to it.getString(1) }
+        }
+    }
+
+    suspend fun subjectTitle(subjectCode: String): String = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery("SELECT title FROM subjects WHERE code = ?", arrayOf(subjectCode)).use { c ->
+                if (c.moveToFirst()) c.getString(0) else subjectCode
+            }
+        }
+    }
+
+    /** Справочник предметов для формы профиля. */
+    suspend fun subjects(): List<Pair<String, String>> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery("SELECT code, title FROM subjects ORDER BY rowid", null).mapRows {
+                it.getString(0) to it.getString(1)
+            }
+        }
+    }
+
     suspend fun countTasks(topicCode: String, type: String): Int = withContext(Dispatchers.IO) {
         db.read { database ->
             database.rawQuery(

@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import ru.tolmachev.ogetrainer.Graph
 import ru.tolmachev.ogetrainer.data.bank.TaskBrief
 import ru.tolmachev.ogetrainer.ui.components.Card
@@ -30,6 +31,7 @@ import ru.tolmachev.ogetrainer.ui.theme.Space
 @Composable
 fun RenderSpikeScreen(onBack: () -> Unit) {
     val colors = LocalOgeColors.current
+    val dark = colors.background.luminance() < 0.5f
     var tasks by remember { mutableStateOf<List<TaskBrief>>(emptyList()) }
     var theoryTitle by remember { mutableStateOf("") }
     var theory by remember { mutableStateOf<String?>(null) }
@@ -58,7 +60,7 @@ fun RenderSpikeScreen(onBack: () -> Unit) {
                             style = MaterialTheme.typography.labelMedium,
                             color = colors.muted,
                         )
-                        Card { MarkdownView(currentTheory) }
+                        Card { MarkdownView(markdown = currentTheory, dark = dark) }
                     }
                 }
             }
@@ -69,7 +71,7 @@ fun RenderSpikeScreen(onBack: () -> Unit) {
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.muted.copy(alpha = 0.6f),
                     )
-                    Card { MarkdownView(task.prompt) }
+                    Card { MarkdownView(markdown = task.prompt, dark = dark) }
                 }
             }
         }

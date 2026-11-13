@@ -19,10 +19,29 @@ android {
         applicationId = "ru.tolmachev.ogetrainer"
         minSdk = 31
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 4
+        versionName = "0.1.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
+        // Встроенный движок llama.cpp: собираем под телефоны и под эмулятор.
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_STL=c++_shared", "-DGGML_OPENMP=OFF")
+                cppFlags += listOf("-O3", "-DNDEBUG")
+            }
+        }
+    }
+
+    ndkVersion = "28.2.13676358"
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {
@@ -62,6 +81,7 @@ android {
 
     packaging {
         resources.excludes += setOf("META-INF/LICENSE.md", "META-INF/NOTICE.md", "META-INF/DEPENDENCIES")
+        jniLibs.useLegacyPackaging = false
     }
 
     lint {

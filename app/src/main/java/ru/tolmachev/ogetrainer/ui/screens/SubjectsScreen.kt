@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import ru.tolmachev.ogetrainer.Graph
 import ru.tolmachev.ogetrainer.data.db.Profile
 import ru.tolmachev.ogetrainer.data.db.SubjectStat
-import ru.tolmachev.ogetrainer.ui.components.Avatar
+import ru.tolmachev.ogetrainer.ui.components.ProfileAvatar
 import ru.tolmachev.ogetrainer.ui.components.Card
 import ru.tolmachev.ogetrainer.ui.components.ThinProgress
 import ru.tolmachev.ogetrainer.ui.components.TopBar
@@ -50,8 +50,7 @@ private val SUBJECT_ICON = mapOf(
 fun SubjectsScreen(
     profile: Profile,
     onOpenSubject: (SubjectStat) -> Unit,
-    onOpenAdmin: () -> Unit,
-    onLogout: () -> Unit,
+    onMenu: () -> Unit,
 ) {
     val colors = LocalOgeColors.current
     var stats by remember { mutableStateOf<List<SubjectStat>>(emptyList()) }
@@ -61,11 +60,8 @@ fun SubjectsScreen(
     Column(Modifier.fillMaxSize()) {
         TopBar(
             title = "Мои предметы",
-            trailing = {
-                TextButton(onClick = onOpenAdmin) { Text("Админ", color = colors.muted) }
-                Avatar(profile.fullName)
-                TextButton(onClick = onLogout) { Text("Выйти", color = colors.muted) }
-            },
+            onMenu = onMenu,
+            trailing = { ProfileAvatar(profile.photoPath, profile.fullName) },
         )
         LazyColumn(
             modifier = Modifier

@@ -1,5 +1,12 @@
 package ru.tolmachev.ogetrainer.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ru.tolmachev.ogetrainer.Graph
@@ -39,16 +47,24 @@ import ru.tolmachev.ogetrainer.ui.theme.LocalOgeColors
 import ru.tolmachev.ogetrainer.ui.theme.OgeColors
 import ru.tolmachev.ogetrainer.ui.theme.Space
 
+/**
+ * Экран темы. Список тем — полноэкранный слой, который уезжает после выбора,
+ * освобождая экран под теорию и задачи (двухколоночная вёрстка веба на телефоне не читается).
+ */
 @Composable
 fun TopicScreen(
     profile: Profile,
     subjectCode: String,
     subjectTitle: String,
+    onMenu: () -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = LocalOgeColors.current
+    val dark = colors.background.luminance() < 0.5f
+
     var rows by remember { mutableStateOf<List<TopicRow>>(emptyList()) }
     var selected by remember { mutableStateOf<TopicRow?>(null) }
+    var listOpen by remember { mutableStateOf(true) }
     var tab by remember { mutableStateOf(0) }
     var theoryTitle by remember { mutableStateOf("") }
     var theoryContent by remember { mutableStateOf<String?>(null) }
@@ -69,148 +85,231 @@ fun TopicScreen(
     }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(title = subjectTitle, onBack = onBack)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Space.x3),
-            horizontalArrangement = Arrangement.spacedBy(Space.x2),
-        ) {
-            LazyColumn(
-                modifier = Modifier.weight(0.46f),
-                verticalArrangement = Arrangement.spacedBy(Space.x0_5),
-            ) {
-                items(rows, key = { it.code }) { topic ->
-                    TopicNode(
-                        topic = topic,
-                        selected = selected?.code == topic.code,
-                        child = topic.parentCode != null,
-                        onClick = {
-                            selected = topic
-                            tab = 0
-                        },
+        TopBar(
+            title = subjectTitle,
+            onMenu = onMenu,
+            onBack = onBack,
+            trailing = {
+                if (!listOpen) {
+                    Text(
+                        text = "Темы",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = OgeColors.Accent,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(Space.fieldRadius))
+                            .clickable { listOpen = true }
+                            .padding(horizontal = Space.x2, vertical = Space.x1),
                     )
                 }
-            }
-            Column(
-                modifier = Modifier
-                    .weight(0.54f)
-                    .fillMaxSize(),
-            ) {
-                val current = selected
-                if (current == null) {
-                    Text(
-                        "Выберите тему слева: сначала теория, затем задачи.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.muted,
-                        modifier = Modifier.padding(top = Space.x2),
-                    )
+            },
+        )
+
+        AnimatedContent(
+            targetState = listOpen,
+            transitionSpec = {
+                if (targetState) {
+                    // возврат к списку: он входит слева
+                    (slideInHorizontally(tween(220)) { -it / 3 } + fadeIn(tween(180))) togetherWith
+                        (slideOutHorizontally(tween(200)) { it } + fadeOut(tween(160)))
                 } else {
-                    TabRow(tab) { tab = it }
-                    when (tab) {
-                        0 -> TheoryPane(current, theoryTitle, theoryContent)
-                        else -> PracticePane(current)
+                    // выбор сделан: список уезжает влево, освобождая место
+                    (slideInHorizontally(tween(220)) { it } + fadeIn(tween(180))) togetherWith
+                        (slideOutHorizontally(tween(220)) { -it } + fadeOut(tween(160)))
+                }
+            },
+            label = "topics",
+            modifier = Modifier.fillMaxSize(),
+        ) { showList ->
+            if (showList) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = Space.x3),
+                    verticalArrangement = Arrangement.spacedBy(Space.x0_5),
+                ) {
+                    items(rows, key = { it.code }) { topic ->
+                        TopicNode(
+                            topic = topic,
+                            selected = selected?.code == topic.code,
+                            child = topic.parentCode != null,
+                            onClick = {
+                                selected = topic
+                                tab = 0
+                                listOpen = false
+                            },
+                        )
                     }
                 }
+            } else {
+                TopicContent(
+                    topic = selected,
+                    tab = tab,
+                    onTab = { tab = it },
+                    theoryTitle = theoryTitle,
+                    theory = theoryContent,
+                    dark = dark,
+                    onOpenTopics = { listOpen = true },
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun TopicContent(
+    topic: TopicRow?,
+    tab: Int,
+    onTab: (Int) -> Unit,
+    theoryTitle: String,
+    theory: String?,
+    dark: Boolean,
+    onOpenTopics: () -> Unit,
+) {
+    val colors = LocalOgeColors.current
+    if (topic == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = "Тема не выбрана",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.muted,
+            )
+        }
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = Space.x3),
+        verticalArrangement = Arrangement.spacedBy(Space.x2),
+    ) {
+        Text(
+            text = topic.title,
+            style = MaterialTheme.typography.titleMedium,
+            color = colors.text,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        TabRow(tab, onTab)
+        when (tab) {
+            0 -> TheoryPane(topic, theoryTitle, theory, dark, onOpenTopics)
+            else -> PracticePane(topic, onOpenTopics)
         }
     }
 }
 
 @Composable
 private fun TabRow(selected: Int, onSelect: (Int) -> Unit) {
-    val colors = LocalOgeColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Space.fieldRadius))
-            .background(colors.surfaceElevated)
-            .border(1.dp, colors.border, RoundedCornerShape(Space.fieldRadius))
-            .padding(Space.x0_5),
-        horizontalArrangement = Arrangement.spacedBy(Space.x0_5),
+    androidx.compose.material3.TabRow(
+        selectedTabIndex = selected,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary,
     ) {
         listOf("Теория", "Задачи").forEachIndexed { index, title ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .clip(RoundedCornerShape(Space.x1))
-                    .background(if (selected == index) colors.accentSoft else Color.Transparent)
-                    .clickable { onSelect(index) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (selected == index) OgeColors.Accent else colors.muted,
-                )
-            }
+            androidx.compose.material3.Tab(
+                selected = selected == index,
+                onClick = { onSelect(index) },
+                text = {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (selected == index) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun TheoryPane(topic: TopicRow, theoryTitle: String, theory: String?) {
+private fun TheoryPane(
+    topic: TopicRow,
+    theoryTitle: String,
+    theory: String?,
+    dark: Boolean,
+    onOpenTopics: () -> Unit,
+) {
     val colors = LocalOgeColors.current
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = Space.x2),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Space.x2),
     ) {
-        item {
-            Text(
-                text = if (theoryTitle.isBlank()) topic.title else theoryTitle,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.muted.copy(alpha = 0.98f),
-            )
+        if (theoryTitle.isNotBlank() && theoryTitle != topic.title) {
+            item {
+                Text(
+                    text = theoryTitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.muted,
+                )
+            }
         }
         item {
             when {
                 theory == null -> Card {
-                    Text(
-                        "Конспекта нет в банке. Генерация через провайдера — этап 3 плана.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.muted,
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(Space.x1_5)) {
+                        Text(
+                            "Конспекта нет в банке. Генерация через провайдера — этап 3 плана.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.muted,
+                        )
+                    }
                 }
                 theory.isBlank() -> Card {
                     Text("Пустой конспект", style = MaterialTheme.typography.bodyMedium, color = colors.muted)
                 }
-                else -> Card { MarkdownView(theory) }
+                else -> Card { MarkdownView(markdown = theory, dark = dark) }
             }
+        }
+        item {
+            Text(
+                text = "← Другая тема",
+                style = MaterialTheme.typography.labelLarge,
+                color = OgeColors.Accent,
+                modifier = Modifier
+                    .clickable { onOpenTopics() }
+                    .padding(vertical = Space.x2),
+            )
         }
     }
 }
 
 @Composable
-private fun PracticePane(topic: TopicRow) {
+private fun PracticePane(topic: TopicRow, onOpenTopics: () -> Unit) {
     val colors = LocalOgeColors.current
     var shortCount by remember(topic.code) { mutableStateOf(-1) }
     LaunchedEffect(topic.code) {
         shortCount = Graph.study.countTasks(topic.code, "short")
     }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = Space.x2),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Space.x2),
     ) {
-        Text(topic.title, style = MaterialTheme.typography.titleMedium, color = colors.muted.copy(alpha = 0.98f))
         Card {
             Column(verticalArrangement = Arrangement.spacedBy(Space.x1_5)) {
                 Text(
                     "В банке по теме: ${if (shortCount < 0) "…" else shortCount} задач с кратким ответом",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.muted,
+                    color = colors.text,
                 )
                 Text(
                     "Выдача задачи, локальная проверка и разбор — этап 2 плана.",
                     style = MaterialTheme.typography.labelMedium,
-                    color = colors.muted.copy(alpha = 0.7f),
+                    color = colors.muted,
                 )
             }
         }
+        Text(
+            text = "← Другая тема",
+            style = MaterialTheme.typography.labelLarge,
+            color = OgeColors.Accent,
+            modifier = Modifier
+                .clickable { onOpenTopics() }
+                .padding(vertical = Space.x2),
+        )
     }
 }
 
@@ -220,6 +319,7 @@ private fun TopicNode(topic: TopicRow, selected: Boolean, child: Boolean, onClic
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(Space.listRow)
             .clip(RoundedCornerShape(Space.fieldRadius))
             .then(
                 if (selected) {
@@ -231,21 +331,21 @@ private fun TopicNode(topic: TopicRow, selected: Boolean, child: Boolean, onClic
                 },
             )
             .clickable { onClick() }
-            .padding(start = if (child) Space.x3 else Space.x2, end = Space.x2, top = Space.x1_5, bottom = Space.x1_5),
+            .padding(start = if (child) Space.x4 else Space.x2, end = Space.x2),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = topic.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) OgeColors.Accent else colors.muted.copy(alpha = 0.95f),
-            maxLines = 2,
+            color = if (selected) OgeColors.Accent else colors.text,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         Text(
             text = if (Mastery.isCompleted(topic.mastery)) "✓" else "${(topic.mastery * 100).toInt()}%",
             style = MaterialTheme.typography.labelMedium,
-            color = if (Mastery.isCompleted(topic.mastery)) colors.okText else colors.muted.copy(alpha = 0.7f),
+            color = if (Mastery.isCompleted(topic.mastery)) colors.okText else colors.muted,
         )
     }
 }

@@ -117,14 +117,5 @@ fun Field(
             },
             imeAction = ImeAction.Next,
         ),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = OgeColors.Accent,
-            unfocusedBorderColor = colors.border,
-            focusedLabelColor = OgeColors.Accent,
-            unfocusedLabelColor = colors.muted,
-            focusedTextColor = colors.muted.copy(alpha = 0.98f),
-            unfocusedTextColor = colors.muted.copy(alpha = 0.98f),
-            cursorColor = OgeColors.Accent,
-        ),
     )
 }

@@ -11,6 +11,14 @@ import kotlinx.coroutines.launch
 import ru.tolmachev.ogetrainer.data.auth.ProfilesRepository
 import ru.tolmachev.ogetrainer.data.bank.BankRepository
 import ru.tolmachev.ogetrainer.data.db.OgeDatabase
+import ru.tolmachev.ogetrainer.data.llm.LocalLlmGenerator
+import ru.tolmachev.ogetrainer.data.models.ModelDownloads
+import ru.tolmachev.ogetrainer.data.profile.PhotoStore
+import ru.tolmachev.ogetrainer.data.provider.ContentGenerator
+import ru.tolmachev.ogetrainer.data.provider.LocalGenerator
+import ru.tolmachev.ogetrainer.data.provider.ProviderRepository
+import ru.tolmachev.ogetrainer.data.provider.ProviderStore
+import ru.tolmachev.ogetrainer.data.settings.SettingsRepository
 import ru.tolmachev.ogetrainer.data.study.StudyRepository
 
 enum class ImportStage { Idle, Running, Ready, Failed }
@@ -36,6 +44,18 @@ object Graph {
         private set
     lateinit var study: StudyRepository
         private set
+    lateinit var settings: SettingsRepository
+        private set
+    lateinit var photos: PhotoStore
+        private set
+    lateinit var provider: ProviderRepository
+        private set
+    lateinit var generator: ContentGenerator
+        private set
+    lateinit var localGenerator: LocalGenerator
+        private set
+    lateinit var localLlm: LocalLlmGenerator
+        private set
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -49,6 +69,14 @@ object Graph {
         profiles = ProfilesRepository(db)
         bank = BankRepository(app, db)
         study = StudyRepository(db)
+        settings = SettingsRepository(app)
+        photos = PhotoStore(app)
+        provider = ProviderRepository(db, ProviderStore(app))
+        generator = ContentGenerator(db, provider)
+        localGenerator = LocalGenerator(db)
+        localLlm = LocalLlmGenerator(db)
+        ModelDownloads.init(app)
+        ModelDownloads.resumeIfNeeded(app)
         scope.launch { runImport() }
     }
 
@@ -56,6 +84,8 @@ object Graph {
         _importState.value = _importState.value.copy(stage = ImportStage.Running, message = "Импорт банка…")
         try {
             val result = bank.import()
+            // Встроенный администратор создаётся всегда — приложение не может остаться без входа.
+            profiles.ensureBuiltinAdmin()
             _importState.value = ImportState(
                 stage = ImportStage.Ready,
                 message = if (result.alreadyImported) "Банк уже импортирован" else "Банк импортирован",

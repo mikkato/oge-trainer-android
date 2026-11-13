@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import ru.tolmachev.ogetrainer.Graph
 import ru.tolmachev.ogetrainer.data.db.Profile
-import ru.tolmachev.ogetrainer.ui.components.Avatar
+import ru.tolmachev.ogetrainer.ui.components.ProfileAvatar
 import ru.tolmachev.ogetrainer.ui.components.Card
 import ru.tolmachev.ogetrainer.ui.components.DenseRow
 import ru.tolmachev.ogetrainer.ui.components.PrimaryButton
@@ -65,10 +65,13 @@ fun LoginScreen(onLoggedIn: (Profile) -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(Space.x2),
                     ) {
-                        Avatar(profile.fullName)
+                        ProfileAvatar(profile.photoPath, profile.fullName)
                         DenseRow(
                             title = profile.fullName,
-                            subtitle = ROLE_LABEL[profile.role] ?: profile.role,
+                            subtitle = buildString {
+                                append(ROLE_LABEL[profile.role] ?: profile.role)
+                                if (profile.builtin) append(" · встроенный")
+                            },
                             selected = selected?.id == profile.id,
                             onClick = {
                                 selected = profile

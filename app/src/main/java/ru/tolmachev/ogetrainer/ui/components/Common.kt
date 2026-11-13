@@ -1,53 +1,79 @@
 package ru.tolmachev.ogetrainer.ui.components
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import ru.tolmachev.ogetrainer.Graph
 import ru.tolmachev.ogetrainer.ui.theme.LocalOgeColors
-import ru.tolmachev.ogetrainer.ui.theme.OgeColors
 import ru.tolmachev.ogetrainer.ui.theme.Space
 
+/** Карточка Material 3 с токенами приложения (плоская, без тональной заливки). */
 @Composable
 fun Card(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val colors = LocalOgeColors.current
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Space.cardRadius))
-            .background(colors.surfaceElevated)
-            .border(1.dp, colors.border, RoundedCornerShape(Space.cardRadius))
-            .padding(horizontal = Space.x3, vertical = Space.x2),
-    ) { content() }
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Box(Modifier.padding(horizontal = Space.x3, vertical = Space.x2)) { content() }
+    }
 }
 
+/** Основное действие — заполненная кнопка M3. */
 @Composable
 fun PrimaryButton(
     text: String,
@@ -59,16 +85,16 @@ fun PrimaryButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.height(Space.touchTarget),
-        shape = RoundedCornerShape(Space.fieldRadius),
+        shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
-            containerColor = OgeColors.Accent,
-            contentColor = Color.White,
-            disabledContainerColor = OgeColors.AccentDisabled,
-            disabledContentColor = Color(0xFFD8B5B1),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ),
-    ) { Text(text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge) }
+        contentPadding = ButtonDefaults.TextButtonContentPadding,
+    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
 }
 
+/** Второстепенное действие — контурная кнопка M3. */
 @Composable
 fun GhostButton(
     text: String,
@@ -76,149 +102,266 @@ fun GhostButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val colors = LocalOgeColors.current
-    Button(
+    OutlinedButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.height(Space.touchTarget),
-        shape = RoundedCornerShape(Space.fieldRadius),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = colors.muted,
-            disabledContainerColor = Color.Transparent,
-            disabledContentColor = colors.muted.copy(alpha = 0.4f),
-        ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, colors.border),
-    ) { Text(text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge) }
+        shape = MaterialTheme.shapes.small,
+        contentPadding = ButtonDefaults.TextButtonContentPadding,
+    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
 }
 
+/** Индикатор прогресса M3. */
 @Composable
 fun ThinProgress(progress: Float, modifier: Modifier = Modifier) {
-    val colors = LocalOgeColors.current
-    Box(
+    LinearProgressIndicator(
+        progress = { progress.coerceIn(0f, 1f) },
         modifier = modifier
             .fillMaxWidth()
-            .height(6.dp)
-            .clip(RoundedCornerShape(3.dp))
-            .background(colors.border),
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth(progress.coerceIn(0f, 1f))
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(OgeColors.Accent),
-        )
-    }
+            .height(4.dp),
+        color = MaterialTheme.colorScheme.primary,
+        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        drawStopIndicator = {},
+    )
 }
 
+/**
+ * Верхняя панель Material 3: навигационная иконка, заголовок, действия.
+ * Меню также открывается жестом «назад» с правого края.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
     title: String,
+    onMenu: (() -> Unit)? = null,
     onBack: (() -> Unit)? = null,
     trailing: @Composable (RowScope.() -> Unit)? = null,
 ) {
     val colors = LocalOgeColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = Space.x2, end = Space.x2, top = Space.x2, bottom = Space.x1),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Space.x1_5),
-    ) {
-        if (onBack != null) {
-            TextButton(onClick = onBack) {
-                Text("←", style = androidx.compose.material3.MaterialTheme.typography.titleLarge, color = OgeColors.Accent)
+    TopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        navigationIcon = {
+            when {
+                onMenu != null -> IconButton(onClick = onMenu) {
+                    Icon(Icons.Filled.Menu, contentDescription = "Меню", tint = colors.muted)
+                }
+                onBack != null -> IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Назад",
+                        tint = colors.muted,
+                    )
+                }
             }
-        }
-        Text(
-            text = title,
-            style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-            color = colors.muted.copy(alpha = 0.95f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        if (trailing != null) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.x1), content = trailing)
-        }
+        },
+        actions = { trailing?.invoke(this) },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = colors.background,
+            titleContentColor = colors.text,
+            navigationIconContentColor = colors.muted,
+            actionIconContentColor = colors.muted,
+        ),
+        windowInsets = WindowInsets(0, 0, 0, 0),
+    )
+}
+
+/** Пиктограмма меню M3 — если нужна отдельно от TopAppBar. */
+@Composable
+fun MenuGlyph(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(Icons.Filled.Menu, contentDescription = "Меню", tint = LocalOgeColors.current.muted)
     }
 }
 
+/**
+ * Аватар профиля: фото из filesDir, если задано, иначе первая буква имени.
+ * Файл читается в IO и перерисовывается только при смене пути.
+ */
 @Composable
-fun Avatar(name: String, size: Int = 34) {
+fun ProfileAvatar(
+    photoPath: String?,
+    name: String,
+    size: Int = 34,
+    onClick: (() -> Unit)? = null,
+) {
+    val bitmap by produceState<Bitmap?>(initialValue = null, photoPath, size) {
+        value = if (photoPath.isNullOrBlank()) null else withContext(Dispatchers.IO) {
+            Graph.photos.load(photoPath, targetPx = size * 3)
+        }
+    }
     Box(
         modifier = Modifier
             .size(size.dp)
             .clip(CircleShape)
-            .background(OgeColors.AccentSoft),
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = name.trim().firstOrNull()?.uppercase() ?: "?",
-            color = OgeColors.Accent,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-        )
+        val image = bitmap
+        if (image != null) {
+            Image(
+                bitmap = image.asImageBitmap(),
+                contentDescription = name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(size.dp)
+                    .clip(CircleShape),
+            )
+        } else {
+            Text(
+                text = name.trim().firstOrNull()?.uppercase() ?: "?",
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
+/** Совместимость: аватар без фото. */
+@Composable
+fun Avatar(name: String, size: Int = 34) = ProfileAvatar(photoPath = null, name = name, size = size)
+
+/** Строка списка Material 3 с необязательным выделением выбора. */
 @Composable
 fun DenseRow(
     title: String,
     subtitle: String? = null,
     trailing: String? = null,
     selected: Boolean = false,
+    leading: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val colors = LocalOgeColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Space.fieldRadius))
-            .then(if (selected) Modifier.background(colors.accentSoft) else Modifier)
-            .then(if (selected) Modifier.border(1.dp, OgeColors.Accent, RoundedCornerShape(Space.fieldRadius)) else Modifier)
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-            .padding(horizontal = Space.x2, vertical = Space.x1_5),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
+    ListItem(
+        headlineContent = {
             Text(
-                text = title,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                color = if (selected) OgeColors.Accent else colors.muted.copy(alpha = 0.98f),
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (selected) MaterialTheme.colorScheme.primary else colors.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (subtitle != null) {
+        },
+        supportingContent = subtitle?.let {
+            {
                 Text(
-                    text = subtitle,
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                    color = colors.muted.copy(alpha = 0.7f),
+                    it,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-        }
-        if (trailing != null) {
+        },
+        trailingContent = trailing?.let {
+            { Text(it, style = MaterialTheme.typography.labelMedium, color = colors.muted) }
+        },
+        leadingContent = leading,
+        colors = ListItemDefaults.colors(
+            containerColor = if (selected) colors.accentSoft else Color.Transparent,
+            headlineColor = colors.text,
+            supportingColor = colors.muted,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
+    )
+}
+
+/** Пункт меню в стиле навигационного ящика M3. */
+@Composable
+fun MenuRow(
+    title: String,
+    selected: Boolean = false,
+    trailing: String? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    val colors = LocalOgeColors.current
+    NavigationDrawerItem(
+        label = {
             Text(
-                text = trailing,
-                style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                color = if (selected) OgeColors.Accent else colors.muted,
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-        }
-    }
+        },
+        selected = selected,
+        onClick = { if (enabled) onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(Space.listRow + 8.dp)
+            .then(if (enabled) Modifier else Modifier.alpha(0.45f)),
+        colors = NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = colors.accentSoft,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedTextColor = colors.text,
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = colors.muted,
+        ),
+        shape = MaterialTheme.shapes.small,
+        badge = trailing?.let {
+            { Text(it, style = MaterialTheme.typography.labelMedium, color = colors.muted) }
+        },
+    )
 }
 
 @Composable
-fun BulletSeparator() {
-    val colors = LocalOgeColors.current
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Space.x2)
-            .height(1.dp)
-            .width(1.dp)
-            .background(colors.border.copy(alpha = 0.6f)),
+fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = LocalOgeColors.current.muted,
+        modifier = Modifier.padding(start = Space.x2, top = Space.x2, bottom = Space.x0_5),
     )
+}
+
+@Composable
+fun Hairline() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = Space.x2, vertical = Space.x0_5),
+        thickness = 1.dp,
+        color = LocalOgeColors.current.border,
+    )
+}
+
+/** Выбор одного варианта — SingleChoiceSegmentedButtonRow M3. */
+@Composable
+fun ChoiceRow(
+    options: List<String>,
+    selected: String?,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalOgeColors.current
+    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
+        options.forEachIndexed { index, option ->
+            SegmentedButton(
+                selected = option == selected,
+                onClick = { onSelect(option) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = colors.accentSoft,
+                    activeContentColor = MaterialTheme.colorScheme.primary,
+                    activeBorderColor = MaterialTheme.colorScheme.primary,
+                    inactiveContainerColor = Color.Transparent,
+                    inactiveContentColor = colors.muted,
+                    inactiveBorderColor = colors.border,
+                ),
+                label = {
+                    Text(option, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                },
+            )
+        }
+    }
 }

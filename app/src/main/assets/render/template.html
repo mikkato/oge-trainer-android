@@ -12,6 +12,13 @@
         --code-bg: #262D3B;
         --border: #384052;
     }
+    html.light {
+        --fg: #14181F;
+        --muted: #4E5766;
+        --accent: #E8554A;
+        --code-bg: #EBEFF4;
+        --border: #D3DAE3;
+    }
     html, body { margin: 0; padding: 0; background: transparent; }
     body {
         color: var(--fg);
@@ -87,6 +94,15 @@
     }
 
     window.renderMarkdown = renderMarkdown;
+
+    window.setTheme = function (mode) {
+        if (mode === 'light') {
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.remove('light');
+        }
+        setTimeout(reportHeight, 30);
+    };
 
     function bootstrap() {
         ready = true;
