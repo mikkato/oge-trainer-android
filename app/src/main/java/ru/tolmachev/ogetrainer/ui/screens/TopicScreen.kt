@@ -10,6 +10,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -310,7 +312,8 @@ private fun PracticePane(
     var shortCount by remember(topic.code) { mutableStateOf(-1) }
 
     suspend fun loadNext(type: String) {
-        task = Graph.study.pickTask(profile.id, topic.code, type)
+        val types = if (type == "short") listOf("short") else StudyRepository.WRITTEN_TYPES
+        task = Graph.study.pickTask(profile.id, topic.code, types)
         answer = ""
         result = null
         pendingMessage = null
@@ -322,7 +325,9 @@ private fun PracticePane(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(Space.x2),
     ) {
         ChoiceRow(
@@ -357,11 +362,18 @@ private fun PracticePane(
 
         val current = task
         if (current != null && result == null && pendingMessage == null) {
-            Field(
-                label = if (mode == "Короткие") "Ответ" else "Развёрнутый ответ",
-                value = answer,
-                onValueChange = { answer = it },
-            )
+            if (mode == "Короткие") {
+                Field(label = "Ответ", value = answer, onValueChange = { answer = it })
+            } else {
+                androidx.compose.material3.OutlinedTextField(
+                    value = answer,
+                    onValueChange = { answer = it },
+                    label = { Text("Развёрнутый ответ") },
+                    minLines = 4,
+                    maxLines = 8,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(Space.x2)) {
                 PrimaryButton(
                     text = if (busy) "Проверяем…" else "Ответить",

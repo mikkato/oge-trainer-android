@@ -84,7 +84,7 @@ fun DiagnosticsScreen(profile: Profile, onFinish: () -> Unit) {
                     Card {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                subjectTitles[section.substringBefore('.')] ?: section.substringBefore('.'),
+                                section,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f),
                             )

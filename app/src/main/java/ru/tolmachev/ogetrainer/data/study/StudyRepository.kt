@@ -59,7 +59,10 @@ class StudyRepository(private val db: OgeDatabase) {
     )
 
     data class DiagnosticsTask(
+        /** Код раздела (родительская тема). */
         val section: String,
+        /** Название раздела для отчёта. */
+        val sectionTitle: String,
         val subjectCode: String,
         val task: TaskItem,
     )
@@ -164,7 +167,15 @@ class StudyRepository(private val db: OgeDatabase) {
      * Следующая задача: сначала нерешённые, затем повтор. Сложность подбирается под
      * освоение темы (низкое — базовые, высокое — повышенные), проверенные задачи — первыми.
      */
+    companion object {
+        /** Письменные типы, как они записаны в банке: extended, izlozhenie, sochinenie. */
+        val WRITTEN_TYPES = listOf("extended", "izlozhenie", "sochinenie")
+    }
+
     suspend fun pickTask(profileId: Long, topicCode: String, type: String): TaskItem? =
+        pickTask(profileId, topicCode, listOf(type))
+
+    suspend fun pickTask(profileId: Long, topicCode: String, types: List<String>): TaskItem? =
         withContext(Dispatchers.IO) {
             db.read { database ->
                 val mastery = database.rawQuery(
@@ -194,20 +205,22 @@ class StudyRepository(private val db: OgeDatabase) {
                         )
                     }.firstOrNull()
 
+                val placeholders = types.joinToString(",") { "'" + it + "'" }
                 val base =
-                    "SELECT * FROM tasks WHERE topic_code = ? AND type = ?" +
+                    "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders)" +
                         " AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)"
                 val difficultyLike = arrayOf("local:%", "llm:%")
 
                 // 1) нерешённая задача нужной сложности
                 query(
                     "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY trusted DESC, id LIMIT 1",
-                    arrayOf(topicCode, type, profileId.toString()) + difficultyLike,
+                    arrayOf(topicCode, profileId.toString()) + difficultyLike,
                 )?.takeIf { Difficulty.of(it.origin) == target }
-                    ?: query("$base ORDER BY trusted DESC, id LIMIT 1", arrayOf(topicCode, type, profileId.toString()))
+                    ?: query("$base ORDER BY trusted DESC, id LIMIT 1", arrayOf(topicCode, profileId.toString()))
                     ?: query(
-                        "SELECT * FROM tasks WHERE topic_code = ? AND type = ? ORDER BY trusted DESC, id LIMIT 1",
-                        arrayOf(topicCode, type),
+                        "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders) " +
+                            "ORDER BY trusted DESC, id LIMIT 1",
+                        arrayOf(topicCode),
                     )
             }
         }
@@ -423,6 +436,7 @@ class StudyRepository(private val db: OgeDatabase) {
                         if (task != null) {
                             result += DiagnosticsTask(
                                 section = topics.first().section,
+                                sectionTitle = topics.first().title,
                                 subjectCode = topic.subject,
                                 task = task,
                             )
@@ -450,7 +464,8 @@ class StudyRepository(private val db: OgeDatabase) {
         profileId: Long,
         answers: List<Triple<DiagnosticsTask, String, Boolean>>,
     ): DiagnosticsResult = withContext(Dispatchers.IO) {
-        val bySection = answers.groupBy { it.first.section }
+        // Группируем по названию раздела: это то, что видит админ в отчёте.
+        val bySection = answers.groupBy { it.first.sectionTitle }
         val sections = bySection.map { (section, list) ->
             val accuracy = if (list.isEmpty()) 0.0 else list.count { it.third }.toDouble() / list.size
             section to accuracy
@@ -459,11 +474,13 @@ class StudyRepository(private val db: OgeDatabase) {
 
         db.write { database ->
             val now = System.currentTimeMillis()
-            bySection.forEach { (section, list) ->
+            bySection.forEach { (_, list) ->
                 val accuracy = if (list.isEmpty()) 0.0 else list.count { it.third }.toDouble() / list.size
+                // Код раздела берём из самих ответов, а не из подписи.
+                val sectionCode = list.first().first.section
                 val topics = database.rawQuery(
                     "SELECT code FROM topics WHERE COALESCE(parent_code, code) = ?",
-                    arrayOf(section),
+                    arrayOf(sectionCode),
                 ).mapRows { it.getString(0) }
                 topics.forEach { topicCode ->
                     database.insertWithOnConflict(

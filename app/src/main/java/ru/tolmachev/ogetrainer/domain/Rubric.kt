@@ -15,12 +15,13 @@ data class Criterion(
 object Rubric {
 
     fun forType(type: String, maxPoints: Int): List<Criterion> = when (type) {
-        "essay" -> listOf(
+        // В банке типы: short, extended, izlozhenie, sochinenie.
+        "sochinenie", "essay" -> listOf(
             Criterion(1, "Содержание: тема раскрыта, есть тезис и аргументы", 2),
             Criterion(2, "Структура: вступление, основная часть, вывод", 1),
             Criterion(3, "Речь: связность, отсутствие повторов и речевых ошибок", 1),
         )
-        "presentation" -> listOf(
+        "izlozhenie", "presentation" -> listOf(
             Criterion(1, "Содержание: смысл передан без потери микротем", 2),
             Criterion(2, "Сжатие: нет дословного пересказа", 1),
             Criterion(3, "Связность: логичные переходы между частями", 1),

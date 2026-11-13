@@ -33,8 +33,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.tolmachev.ogetrainer.Graph
@@ -70,6 +72,7 @@ fun ProfileEditorScreen(
 ) {
     val colors = LocalOgeColors.current
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
     val editing = profile != null
 
     var tab by remember { mutableStateOf(0) }
@@ -277,6 +280,78 @@ fun ProfileEditorScreen(
                             }
                             Text(
                                 text = if (program == "oge") "Программа: ОГЭ" else "Программа: школьная",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colors.muted,
+                            )
+                        }
+                    }
+                }
+
+                if (showProgram && grade in 1..11) {
+                    Card {
+                        Column(verticalArrangement = Arrangement.spacedBy(Space.x0_5)) {
+                            SectionLabel("ПРОГРАММА ${grade} КЛАССА · ФГОС")
+                            val curriculum = ru.tolmachev.ogetrainer.data.school.SchoolCurriculum
+                                .subjectsFor(context, grade)
+                            curriculum.forEach { item ->
+                                val bankCode = item.bankCode
+                                val inProgram = bankCode != null && bankCode in selectedSubjects
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .then(
+                                            if (bankCode != null) {
+                                                Modifier.clickable {
+                                                    selectedSubjects = if (inProgram) {
+                                                        selectedSubjects - bankCode
+                                                    } else {
+                                                        selectedSubjects + bankCode
+                                                    }
+                                                }
+                                            } else {
+                                                Modifier
+                                            },
+                                        )
+                                        .padding(vertical = Space.x0_5),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = if (inProgram) "✓" else if (bankCode != null) "·" else "—",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = when {
+                                            inProgram -> OgeColors.Accent
+                                            bankCode != null -> colors.muted
+                                            else -> colors.muted.copy(alpha = 0.5f)
+                                        },
+                                        modifier = Modifier.width(20.dp),
+                                    )
+                                    Text(
+                                        text = item.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = if (bankCode != null) colors.text else colors.muted.copy(alpha = 0.6f),
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    if (item.isOge) {
+                                        Text(
+                                            "ОГЭ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                        )
+                                    }
+                                    if (bankCode == null) {
+                                        Text(
+                                            "нет банка",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colors.muted.copy(alpha = 0.6f),
+                                            modifier = Modifier.padding(start = Space.x1),
+                                        )
+                                    }
+                                }
+                            }
+                            Text(
+                                "ОГЭ: русский язык и математика обязательны, остальные предметы — по выбору. " +
+                                    "Предметы без банка заданий показаны справочно: их добавление станет доступно " +
+                                    "после загрузки контента.",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colors.muted,
                             )
