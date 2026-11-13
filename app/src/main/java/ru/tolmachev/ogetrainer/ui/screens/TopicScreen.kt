@@ -310,10 +310,12 @@ private fun PracticePane(
     var pendingMessage by remember(topic.code) { mutableStateOf<String?>(null) }
     var busy by remember(topic.code) { mutableStateOf(false) }
     var shortCount by remember(topic.code) { mutableStateOf(-1) }
+    // пропущенные в этой сессии темы не подсунуть повторно (пока не решены/не закрыт экран)
+    val skipped = remember(topic.code) { mutableSetOf<Long>() }
 
     suspend fun loadNext(type: String) {
         val types = if (type == "short") listOf("short") else StudyRepository.WRITTEN_TYPES
-        task = Graph.study.pickTask(profile.id, topic.code, types)
+        task = Graph.study.pickTask(profile.id, topic.code, types, skipped)
         answer = ""
         result = null
         pendingMessage = null
@@ -450,6 +452,7 @@ private fun PracticePane(
                     }
                 }
                 GhostButton(text = "Пропустить", enabled = !busy) {
+                    task?.let { skipped += it.id }
                     scope.launch { loadNext(if (mode == "Короткие") "short" else "detailed") }
                 }
             }

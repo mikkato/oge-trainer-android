@@ -113,9 +113,10 @@ fun MarkdownView(
             },
             update = { web ->
                 web.tag = Triple(baseFontPx, markdown, dark)
+                val text = MarkdownNormalizer.toKatex(markdown)
                 web.evaluateJavascript(
                     "window.setTheme('${if (dark) "dark" else "light"}');" +
-                        "window.renderMarkdown(${JSONObject.quote(markdown)});",
+                        "window.renderMarkdown(${JSONObject.quote(text)});",
                     null,
                 )
             },

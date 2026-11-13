@@ -177,10 +177,19 @@ class StudyRepository(private val db: OgeDatabase) {
         val WRITTEN_TYPES = listOf("extended", "izlozhenie", "sochinenie")
     }
 
-    suspend fun pickTask(profileId: Long, topicCode: String, type: String): TaskItem? =
-        pickTask(profileId, topicCode, listOf(type))
+    suspend fun pickTask(
+        profileId: Long,
+        topicCode: String,
+        type: String,
+        excludeIds: Set<Long> = emptySet(),
+    ): TaskItem? = pickTask(profileId, topicCode, listOf(type), excludeIds)
 
-    suspend fun pickTask(profileId: Long, topicCode: String, types: List<String>): TaskItem? =
+    suspend fun pickTask(
+        profileId: Long,
+        topicCode: String,
+        types: List<String>,
+        excludeIds: Set<Long> = emptySet(),
+    ): TaskItem? =
         withContext(Dispatchers.IO) {
             db.read { database ->
                 val mastery = database.rawQuery(
@@ -214,18 +223,22 @@ class StudyRepository(private val db: OgeDatabase) {
                 val placeholders = types.joinToString(",") { "'" + it + "'" }
                 // Только принятые задания (trusted = 1) и не выше класса профиля.
                 // Порядок подстановки: тема, класс профиля, профиль (исключение решённых), сложность.
+                val skipClause = if (excludeIds.isEmpty()) "" else
+                    " AND id NOT IN (${excludeIds.joinToString(",")})"
                 val base =
                     "SELECT * FROM tasks WHERE topic_code = ? AND type IN ($placeholders) AND trusted = 1" +
                         " AND grade <= COALESCE((SELECT MAX(p.grade) FROM programs p WHERE p.profile_id = ?), 9)" +
-                        " AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)"
+                        " AND id NOT IN (SELECT task_id FROM attempts WHERE profile_id = ?)" + skipClause
                 val args = arrayOf(topicCode, profileId.toString(), profileId.toString())
 
-                // 1) нерешённая задача нужной сложности, 2) любая нерешённая принятая
+                // 1) нерешённая задача нужной сложности, 2) любая нерешённая принятая.
+                // RANDOM(): ребёнок не должен видеть один и тот же порядок (антизапоминание),
+                // иначе «Пропустить» и повторный вход в тему дают ту же первую задачу.
                 query(
-                    "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY id LIMIT 1",
+                    "$base AND (origin LIKE ? OR origin LIKE ?) ORDER BY RANDOM() LIMIT 1",
                     args + arrayOf("local:%", "llm:%"),
                 )?.takeIf { Difficulty.of(it.origin) == target }
-                    ?: query("$base ORDER BY id LIMIT 1", args)
+                    ?: query("$base ORDER BY RANDOM() LIMIT 1", args)
             }
         }
 

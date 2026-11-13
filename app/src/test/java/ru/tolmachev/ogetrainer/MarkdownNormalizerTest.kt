@@ -100,4 +100,21 @@ class MarkdownNormalizerTest {
         val output = MarkdownNormalizer.toKatex(source)
         assertEquals(2, output.count { it == Char(36) })
     }
+
+    @Test
+    fun `markdown-картинка с числовым путём не оборачивается в формулу`() {
+        val source = "![Рисунок](../bank/media/graphs/math_lin_math8.1.31_1.png)\n\n" +
+            "Прямая меняется на -2 — значит k = -2."
+        val output = MarkdownNormalizer.toKatex(source)
+        assertTrue(output.startsWith("![Рисунок](../bank/media/graphs/math_lin_math8.1.31_1.png)"))
+        assertTrue(output.contains("$d" + "k = -2" + "$"))
+    }
+
+    @Test
+    fun `кандидат формулы не переносится через пустую строку`() {
+        val source = "значит k = -2.\n\n**Ответ:** -2"
+        val output = MarkdownNormalizer.toKatex(source)
+        assertTrue("разметка съедена: " + output, output.contains("**Ответ:** -2"))
+        assertTrue("лишние доллары: " + output, output.count { it == Char(36) } <= 2)
+    }
 }

@@ -78,6 +78,10 @@ class BankRepository(
         val gradeTheories = runCatching {
             JSONArray(JSONObject(asset("grades-theories.json")).getJSONArray("theories").toString())
         }.getOrDefault(JSONArray())
+        // Теория по темам ФРП (конспекты сгенерированы и проверены, см. tools/frp/gen_theory.py).
+        val frpTheories = runCatching {
+            JSONArray(JSONObject(asset("frp-theories.json")).getJSONArray("theories").toString())
+        }.getOrDefault(JSONArray())
         val gradeTopics = runCatching {
             JSONArray(JSONObject(asset("grades.json")).getJSONArray("topics").toString())
         }.getOrDefault(JSONArray())
@@ -203,6 +207,20 @@ class BankRepository(
                 )
             }
 
+            frpTheories.forEachObject { item ->
+                database.insertWithOnConflict(
+                    "theories",
+                    null,
+                    ContentValues().apply {
+                        put("topic_code", item.getString("topic"))
+                        put("title", item.getString("title"))
+                        put("content", item.getString("content"))
+                        put("updated_at", System.currentTimeMillis())
+                    },
+                    SQLiteDatabase.CONFLICT_IGNORE,
+                )
+            }
+
             tasks.forEachObject { item ->
                 val type = item.getString("type")
                 val topic = item.getString("topic")
@@ -215,7 +233,8 @@ class BankRepository(
                     put("answer", item.optString("answer"))
                     put("solution", item.optString("solution"))
                     put("max_points", item.optInt("max_points", 1))
-                    put("trusted", if (item.optBoolean("trusted")) 1 else 0)
+                    // Банк ФИПИ — выверенный: trusted по умолчанию, черновик только если явно false
+                    put("trusted", if (!item.has("trusted") || item.optBoolean("trusted")) 1 else 0)
                     put("origin", "bank")
                     put("media", item.optString("media"))
                     put("grade", database.gradeOfTopic(topic))

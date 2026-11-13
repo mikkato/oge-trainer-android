@@ -26,7 +26,7 @@ object MarkdownNormalizer {
 
     /** Фрагмент, похожий на формулу: без кириллицы, с математическим признаком. */
     private val mathCandidate = Regex(
-        "[A-Za-z0-9^_{}()\\[\\]+\\-*/=<>·×÷.,:;%|~\\s]{3,80}",
+        "[A-Za-z0-9^_{}()\\[\\]+\\-*/=<>·×÷.,:;%|~ \\t]{3,80}",
     )
 
     /** Голые команды LaTeX вне формул: \frac{1}{2}, \sqrt{9}, \cdot. */
@@ -107,15 +107,21 @@ object MarkdownNormalizer {
             return "\u0000" + (kept.size - 1) + "\u0000"
         }
 
+        // Markdown-картинки и ссылки изымаем целиком: путь вида
+        // «media/graphs/math_lin_math8.1.31_1.png» содержит цифры и «/» и иначе
+        // распознаётся как формула — обёртка в $...$ ломает ссылку и картинку.
+        val markdownLink = Regex("!?\\[[^\\]\\n]*]\\([^)\\n]*\\)")
+        var text = markdownLink.replace(plain) { match -> stash(match.value) }
+
         // Голые LaTeX-команды: «\frac{1}{2}» без $...$ KaTeX не увидит.
-        var text = bareCommand.replace(plain) { match ->
+        text = bareCommand.replace(text) { match ->
             if (match.value.isBlank()) match.value else stash("$" + match.value + "$")
         }
 
         // Математические фрагменты в ASCII-алфавите; кириллица разрывает фрагмент.
         text = mathCandidate.replace(text) { match ->
             val raw = match.value
-            val fragment = raw.trim().trimEnd('.', ',', ';')
+            val fragment = raw.trim().trimEnd('.', ',', ';', '*')
             val start = raw.indexOf(fragment)
             val prefix = raw.substring(0, start.coerceAtLeast(0))
             val trailing = raw.substring(start.coerceAtLeast(0) + fragment.length)
