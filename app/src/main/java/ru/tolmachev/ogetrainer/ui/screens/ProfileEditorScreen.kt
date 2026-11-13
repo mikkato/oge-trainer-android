@@ -105,14 +105,10 @@ fun ProfileEditorScreen(
                 selectedSubjects = programInfo.third.toSet()
             }
         }
-        // Ползунок ограничен классами с принятым контентом: класс профиля подтягиваем
-        // к ближайшему доступному, иначе положение ползунка не совпадало бы с подписью.
-        val grades = runCatching { Graph.bank.gradesWithContent() }.getOrDefault(emptyList())
-        availableGrades = grades
-        if (grades.isNotEmpty() && grade !in grades) {
-            grade = grades.minByOrNull { kotlin.math.abs(it - grade) } ?: grades.first()
-            program = if (grade == 9) "oge" else "school"
-        }
+        // Ползунок открыт на 1–11 (решение пользователя): класс выбирается любой,
+        // список классов с принятым контентом остаётся справкой под ползунком.
+        val grades = (1..11).toList()
+        availableGrades = runCatching { Graph.bank.gradesWithContent() }.getOrDefault(emptyList())
     }
 
     val picker = rememberLauncherForActivityResult(
@@ -264,7 +260,7 @@ fun ProfileEditorScreen(
                                     modifier = Modifier.padding(start = Space.x2, top = Space.x2, bottom = Space.x0_5),
                                 )
                             }
-                            val positions = availableGrades.ifEmpty { listOf(5, 9) }
+                            val positions = (1..11).toList()
                             Slider(
                                 value = positions.indexOf(grade).coerceAtLeast(0).toFloat(),
                                 onValueChange = { value ->
@@ -298,8 +294,10 @@ fun ProfileEditorScreen(
                                 )
                             }
                             Text(
-                                "Доступны классы с подтверждённым контентом: " +
-                                    positions.joinToString(", ") + ".",
+                                if (availableGrades.isNotEmpty())
+                                    "Принятый контент есть в классах: " +
+                                        availableGrades.joinToString(", ") + "."
+                                else "Принятого контента пока нет — задачи-черновики появятся после приёмки.",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colors.muted,
                             )

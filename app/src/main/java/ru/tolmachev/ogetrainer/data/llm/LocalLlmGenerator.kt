@@ -149,6 +149,10 @@ class LocalLlmGenerator(private val db: ru.tolmachev.ogetrainer.data.db.OgeDatab
         var added = 0
         var skipped = 0
         var rejected = 0
+        // Автоприёмка (решение 5): тумблер в настройках — черновик сразу доверенный.
+        val autoTrust = context.applicationContext
+            .getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+            .getBoolean("auto_trust_llm", true)
         db.write { database ->
             for (index in 0 until array.length()) {
                 val item = array.optJSONObject(index)
@@ -171,7 +175,7 @@ class LocalLlmGenerator(private val db: ru.tolmachev.ogetrainer.data.db.OgeDatab
                         put("answer", answer)
                         put("solution", solution)
                         put("max_points", 1)
-                        put("trusted", 0)
+                        put("trusted", if (autoTrust) 1 else 0)
                         put("grade", grade)
                         put("origin", "llm-local")
                         put("content_hash", hash)

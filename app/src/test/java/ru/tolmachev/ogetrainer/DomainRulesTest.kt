@@ -40,6 +40,22 @@ class AnswerNormalizerTest {
     fun `неразрывный пробел удаляется`() {
         assertTrue(AnswerNormalizer.matches("12\u00A0км", "12км"))
     }
+
+    @Test
+    fun `лемматизация именной морфологии — падеж и род не ломают ответ`() {
+        assertTrue(AnswerNormalizer.matches("Земского собора", "земский собор"))
+        assertTrue(AnswerNormalizer.matches("собору", "собор"))
+        assertTrue(AnswerNormalizer.matches("рыжее", "рыжая"))
+        assertTrue(AnswerNormalizer.matches("в реке", "в река"))
+    }
+
+    @Test
+    fun `лемматизация не сливает орфографически разные формы`() {
+        assertFalse(AnswerNormalizer.matches("стелется", "стелится"))
+        assertFalse(AnswerNormalizer.matches("клеит", "клеят"))
+        assertFalse(AnswerNormalizer.matches("собака", "кошка"))
+        assertFalse(AnswerNormalizer.matches("рыжий", "синий"))
+    }
 }
 
 class MasteryTest {

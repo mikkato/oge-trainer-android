@@ -77,7 +77,11 @@ object Mastery {
     }
 }
 
-/** Нормализация короткого ответа: регистр, пробелы, запятая→точка, все тире к дефису. */
+/**
+ * Нормализация короткого ответа: регистр, пробелы, запятая→точка, все тире к дефису.
+ * matches() дополнительно сравнивает по основанию слов (лёгкая лемматизация),
+ * поэтому падеж/род/спряжение ответа не ломают проверку точных ответов (решение 7).
+ */
 object AnswerNormalizer {
     fun normalize(raw: String): String =
         raw.trim()
@@ -89,8 +93,42 @@ object AnswerNormalizer {
             .replace(',', '.')
             .filterNot { it.isWhitespace() }
 
-    fun matches(userAnswer: String, reference: String): Boolean =
-        normalize(userAnswer) == normalize(reference)
+    /**
+     * Очередь суффиксов ИМЕННОЙ морфологии (существительное/прилагательное/причастие).
+     * Глагольные формы и -ся/-сь не сводим намеренно: для орфографических
+     * заданий «стелется/стелится», «клеит/клеят» — разные правильные ответы.
+     */
+    private val SUFFIXES = listOf(
+        "иями", "ями", "ами", "ими", "ыми", "ого", "его", "ому", "ему",
+        "ых", "их", "ым", "им", "ом", "ём", "ем", "ов", "ев",
+        "ах", "ях", "ам", "ям", "ий", "ый", "ая", "яя", "ое", "ее", "ые", "ие",
+        "ой", "ей", "ую", "юю", "ь", "у", "ю", "ы", "и", "а", "я", "о", "е",
+    )
+
+    /** Основание слова для сверки: консервативно, не короче 3 букв. */
+    fun stem(word: String): String {
+        var w = word.lowercase()
+        if (w.length < 4 || !w.all { it.isLetter() && it in 'а'..'я' || it == 'ё' }) return w
+        if (w.endsWith("ся") || w.endsWith("сь")) return w
+        repeat(2) {
+            val cut = SUFFIXES.firstOrNull { w.length - it.length >= 3 && w.endsWith(it) }
+                ?: return@repeat
+            w = w.dropLast(cut.length)
+        }
+        return w
+    }
+
+    private fun stems(raw: String): List<String> =
+        raw.lowercase().replace('ё', 'е')
+            .split(Regex("[^а-яa-z0-9.+-]+"))
+            .filter { it.isNotEmpty() }.map { stem(it) }
+
+    fun matches(userAnswer: String, reference: String): Boolean {
+        if (normalize(userAnswer) == normalize(reference)) return true
+        val u = stems(userAnswer)
+        val r = stems(reference)
+        return u.isNotEmpty() && u == r
+    }
 }
 
 /**

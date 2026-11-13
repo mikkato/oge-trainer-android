@@ -75,7 +75,7 @@ object Graph {
         settings = SettingsRepository(app)
         photos = PhotoStore(app)
         provider = ProviderRepository(db, ProviderStore(app))
-        generator = ContentGenerator(db, provider)
+        generator = ContentGenerator(db, provider, settings)
         localGenerator = LocalGenerator(db)
         localLlm = LocalLlmGenerator(db)
         answerChecker = AnswerChecker(provider)

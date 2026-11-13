@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
@@ -59,6 +62,7 @@ fun ModelsScreen(onBack: () -> Unit) {
     val activeModel by Graph.settings.localModel.collectAsState()
 
     val checkModel by Graph.settings.checkModel.collectAsState()
+    val autoTrust by Graph.settings.autoTrustLlm.collectAsState()
 
     fun refresh() {
         installed = ModelCatalog.entries.associate { it.id to ModelDownloads.installedBytes(context, it) }
@@ -118,6 +122,31 @@ fun ModelsScreen(onBack: () -> Unit) {
                             "Она подгружается перед проверкой сама — держать две модели в памяти одновременно нельзя.",
                         style = MaterialTheme.typography.labelMedium,
                         color = colors.muted,
+                    )
+                }
+            }
+
+            Card {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(
+                        Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(Space.x0_5),
+                    ) {
+                        Text("Автоприёмка генераций", style = MaterialTheme.typography.labelMedium, color = colors.muted)
+                        Text(
+                            if (autoTrust) "Задания от модели сразу доступны ученику"
+                            else "Новые задачи проходят через очередь приёмки",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.text,
+                        )
+                    }
+                    Switch(
+                        checked = autoTrust,
+                        onCheckedChange = { Graph.settings.setAutoTrustLlm(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = OgeColors.Accent,
+                            checkedTrackColor = OgeColors.Accent,
+                        ),
                     )
                 }
             }

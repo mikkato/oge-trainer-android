@@ -25,6 +25,13 @@ class SettingsRepository(context: Context) {
      */
     val checkModel: StateFlow<String?> = _checkModel
 
+    private val _autoTrustLlm = MutableStateFlow(prefs.getBoolean(KEY_AUTO_TRUST, true))
+    /**
+     * Автоприёмка сгенерированных заданий (решение пользователя 5): новые задачи
+     * от модели сразу trusted=1 и доступны ученику. Выключено — только через очередь приёмки.
+     */
+    val autoTrustLlm: StateFlow<Boolean> = _autoTrustLlm
+
     private fun readTheme(): ThemeMode =
         when (prefs.getString(KEY_THEME, ThemeMode.SYSTEM.name)) {
             ThemeMode.LIGHT.name -> ThemeMode.LIGHT
@@ -51,9 +58,15 @@ class SettingsRepository(context: Context) {
         _checkModel.value = id
     }
 
+    fun setAutoTrustLlm(on: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_TRUST, on).apply()
+        _autoTrustLlm.value = on
+    }
+
     private companion object {
         const val KEY_THEME = "theme_mode"
         const val KEY_LOCAL_MODEL = "local_model"
         const val KEY_CHECK_MODEL = "check_model"
+        const val KEY_AUTO_TRUST = "auto_trust_llm"
     }
 }

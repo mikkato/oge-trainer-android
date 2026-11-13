@@ -16,6 +16,7 @@ import java.security.MessageDigest
 class ContentGenerator(
     private val db: OgeDatabase,
     private val provider: ProviderRepository,
+    private val settings: ru.tolmachev.ogetrainer.data.settings.SettingsRepository,
 ) {
 
     data class Batch(
@@ -80,7 +81,7 @@ class ContentGenerator(
                         put("answer", answer)
                         put("solution", solution)
                         put("max_points", 1)
-                        put("trusted", 0)
+                        put("trusted", if (settings.autoTrustLlm.value) 1 else 0)
                         put("origin", "llm:d$difficulty")
                         put("content_hash", hash)
                     },

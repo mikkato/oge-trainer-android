@@ -25,6 +25,8 @@ SUBJ_TITLE = {
 }
 # темы этих kind не получают задач (генерация их пропускает), но остаются в дереве тем
 SKIP_TASKS = {"control", "project"}
+# Решение пользователя (вопрос 2): второй эшелон — вне тренажёра (в thematic_plan.json сохраняется)
+NO_TRAINER = {"music", "pe", "tech", "odnknr", "orkse", "art"}
 
 def topic_code(subj, grade, sec_idx, num):
     n = str(num).replace(".", "-").strip("-")
@@ -36,6 +38,8 @@ stats = {"gen": 0, "empty": 0}
 order = 0
 for key, by_grade in plan["plan"].items():
     subj = SUBJ_RENAME.get(key, key)
+    if key in NO_TRAINER:
+        continue
     if subj not in SUBJ_TITLE:
         print("нет названия для", subj); continue
     subjects[subj] = {"code": subj, "title": SUBJ_TITLE[subj]}
