@@ -58,6 +58,7 @@ fun AdminScreen(
     onEditProfile: (Profile?) -> Unit,
     onOpenProvider: () -> Unit,
     onOpenModels: () -> Unit,
+    onOpenBank: () -> Unit,
 ) {
     val colors = LocalOgeColors.current
     val importState by Graph.importState.collectAsState()
@@ -119,6 +120,7 @@ fun AdminScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = colors.text,
                     )
+                    GhostButton(text = "Открыть банк") { onOpenBank() }
                 }
             }
             Card {

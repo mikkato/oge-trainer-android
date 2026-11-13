@@ -25,6 +25,10 @@ class OgeDatabase(context: Context) :
             db.execSQL("DELETE FROM profiles")
         }
         // v3 (13.11.2026): карточка профиля — возраст и фото.
+        // v4 (13.11.2026): задания банка ФИПИ — проверенный контент, а не черновики.
+        if (oldVersion < 4) {
+            db.execSQL("UPDATE tasks SET trusted = 1 WHERE origin = 'bank'")
+        }
         if (oldVersion < 3) {
             db.execSQL("ALTER TABLE profiles ADD COLUMN age INTEGER NOT NULL DEFAULT 0")
             db.execSQL("ALTER TABLE profiles ADD COLUMN photo_path TEXT")

@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 3
+    const val VERSION = 4
 
     val CREATE = listOf(
         """

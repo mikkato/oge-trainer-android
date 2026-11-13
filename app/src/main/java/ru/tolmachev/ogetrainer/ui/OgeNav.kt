@@ -30,6 +30,7 @@ import ru.tolmachev.ogetrainer.ui.components.EdgeBackArea
 import ru.tolmachev.ogetrainer.ui.screens.AdminScreen
 import ru.tolmachev.ogetrainer.ui.screens.LoginScreen
 import ru.tolmachev.ogetrainer.ui.screens.ProfileEditorScreen
+import ru.tolmachev.ogetrainer.ui.screens.BankScreen
 import ru.tolmachev.ogetrainer.ui.screens.ModelsScreen
 import ru.tolmachev.ogetrainer.ui.screens.ProviderScreen
 import ru.tolmachev.ogetrainer.ui.screens.RenderSpikeScreen
@@ -50,6 +51,7 @@ private sealed interface Route {
     data class ProfileEditor(val profile: Profile?) : Route
     data object Provider : Route
     data object Models : Route
+    data object Bank : Route
 }
 
 private val ROLE_LABEL = mapOf("student" to "Ученик", "parent" to "Родитель", "admin" to "Администратор")
@@ -98,6 +100,10 @@ fun OgeRoot() {
             true
         }
         Route.Models -> {
+            route = Route.Admin
+            true
+        }
+        Route.Bank -> {
             route = Route.Admin
             true
         }
@@ -191,11 +197,17 @@ fun OgeRoot() {
                         onEditProfile = { route = Route.ProfileEditor(it) },
                         onOpenProvider = { route = Route.Provider },
                         onOpenModels = { route = Route.Models },
+                        onOpenBank = { route = Route.Bank },
                     )
 
                     Route.Provider -> ProviderScreen(onBack = { route = Route.Admin })
 
                     Route.Models -> ModelsScreen(onBack = { route = Route.Admin })
+
+                    Route.Bank -> BankScreen(
+                        onBack = { route = Route.Admin },
+                        onOpenProvider = { route = Route.Provider },
+                    )
 
                     is Route.ProfileEditor -> ProfileEditorScreen(
                         profile = r.profile,
@@ -222,6 +234,7 @@ fun OgeRoot() {
                     adminVisible = current.role == "admin",
                     onAdmin = { route = Route.Admin },
                     onModels = { route = Route.Models },
+                    onBank = { route = Route.Bank },
                     themeMode = themeMode,
                     onThemeMode = { Graph.settings.setThemeMode(it) },
                     onLogout = {

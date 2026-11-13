@@ -54,6 +54,7 @@ fun DrawerMenu(
     adminVisible: Boolean,
     onAdmin: () -> Unit,
     onModels: () -> Unit,
+    onBank: () -> Unit,
     themeMode: ThemeMode,
     onThemeMode: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
@@ -139,6 +140,7 @@ fun DrawerMenu(
                 MenuRow(title = "Предметы", onClick = { onClose(); onSubjects() })
                 if (adminVisible) {
                     MenuRow(title = "Администрирование", onClick = { onClose(); onAdmin() })
+                    MenuRow(title = "Банк контента", onClick = { onClose(); onBank() })
                     MenuRow(title = "Локальные модели", onClick = { onClose(); onModels() })
                 }
 
