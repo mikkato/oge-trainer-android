@@ -88,6 +88,44 @@ if os.path.exists(graphs_file):
         g.setdefault("trusted", True)
         tasks.append(g)
 
+# вердикты независимой проверки второй моделью (verify_pass.py):
+# доверяем задачу только при verdict=ok; wrong_answer/ambiguous/unsolvable —
+# остаются черновиками (trusted=0) для разбора админом.
+def norm(s):
+    s = s.lower().replace("ё", "е")
+    return " ".join(re.sub(r"[^a-zа-я0-9]+", " ", s).split())
+
+POS = {"да", "верно", "истина", "правда", "yes", "true", "1"}
+NEG = {"нет", "неверно", "ложь", "no", "false", "0"}
+
+def yn(w):
+    w = norm(w)
+    return "да" if w in POS else "нет" if w in NEG else None
+
+vr_file = os.path.join(HERE, "verify_report.json")
+if os.path.exists(vr_file):
+    vmap = {}
+    for r in json.load(open(vr_file))["tasks"]:
+        vmap.setdefault(norm(r["prompt_prefix"])[:50], r)
+    cnt = {"ok": 0, "flag": 0, "miss": 0}
+    for e in tasks:
+        if e.get("media"):
+            continue  # детерминированная графика не проверялась — и не нужна
+        r = vmap.get(norm(e["prompt"])[:50])
+        v = r["verdict"] if r else None
+        if v == "wrong_answer" and r:  # ложные срабатывания «да/нет» vs «верно/неверно»
+            a, m = yn(e["answer"]), yn(r.get("my_answer", ""))
+            if a is not None and a == m:
+                v = "ok"
+        if v == "ok":
+            e["trusted"] = True
+            cnt["ok"] += 1
+        elif v:
+            cnt["flag"] += 1
+        else:
+            cnt["miss"] += 1
+    print("вердикты:", cnt)
+
 json.dump({"version": plan["version"], "subjects": sorted(subjects.values(), key=lambda x: x["code"]),
            "topics": topics},
           open("frp-topics.json", "w"), ensure_ascii=False, indent=0)

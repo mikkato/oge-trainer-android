@@ -1,0 +1,9 @@
+{
+ "total": 8518,
+ "ok": 6225,
+ "wrong_answer": 1520,
+ "ambiguous": 707,
+ "unsolvable": 64,
+ "errors": 2,
+ "files": 129
+}
