@@ -41,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -62,6 +63,7 @@ fun AdminScreen(
     onOpenModels: () -> Unit,
     onOpenBank: () -> Unit,
     onStartDiagnostics: (Profile) -> Unit,
+    onStartExam: (Profile) -> Unit,
 ) {
     val colors = LocalOgeColors.current
     val importState by Graph.importState.collectAsState()
@@ -194,18 +196,31 @@ fun AdminScreen(
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.width(26.dp),
                             )
-                            Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                            Box(Modifier.width(76.dp), contentAlignment = Alignment.CenterStart) {
                                 if (item.role == "student") {
-                                    IconButton(
-                                        onClick = { onStartDiagnostics(item) },
-                                        modifier = Modifier.size(32.dp),
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.PlayArrow,
-                                            contentDescription = "Диагностика",
-                                            tint = colors.muted,
-                                            modifier = Modifier.size(18.dp),
-                                        )
+                                    Row {
+                                        IconButton(
+                                            onClick = { onStartDiagnostics(item) },
+                                            modifier = Modifier.size(36.dp),
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.PlayArrow,
+                                                contentDescription = "Диагностика",
+                                                tint = colors.muted,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { onStartExam(item) },
+                                            modifier = Modifier.size(36.dp),
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.List,
+                                                contentDescription = "Пробник ОГЭ",
+                                                tint = colors.muted,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        }
                                     }
                                 }
                             }

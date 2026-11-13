@@ -549,6 +549,107 @@ class StudyRepository(private val db: OgeDatabase) {
         }
     }
 
+    // ---------- пробники ОГЭ (экзаменационный трек, решение 3) ----------
+
+    data class ExamSubject(val code: String, val title: String, val available: Int)
+
+    data class ExamResult(
+        val id: Long,
+        val subjectCode: String,
+        val createdAt: Long,
+        val durationS: Int,
+        val total: Int,
+        val correct: Int,
+    )
+
+    /** Предметы, по которым есть доверенные задания банка ФИПИ, и их количество. */
+    suspend fun examSubjects(): List<ExamSubject> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                """
+                SELECT s.code, s.title, COUNT(t.id) AS n
+                FROM subjects s
+                JOIN tasks t ON t.subject_code = s.code
+                WHERE t.origin = 'bank' AND t.trusted = 1 AND t.type = 'short'
+                GROUP BY s.code HAVING n > 0
+                ORDER BY s.title
+                """.trimIndent(),
+                null,
+            ).mapRows { ExamSubject(it.stringOf("code"), it.stringOf("title"), it.intOf("n")) }
+        }
+    }
+
+    /** Вариант пробника: до [limit] случайных заданий банка по предмету. */
+    suspend fun examPlan(subjectCode: String, limit: Int = 20): List<TaskItem> =
+        withContext(Dispatchers.IO) {
+            db.read { database ->
+                database.rawQuery(
+                    "SELECT * FROM tasks WHERE subject_code = ? AND origin = 'bank' " +
+                        "AND trusted = 1 AND type = 'short' ORDER BY RANDOM() LIMIT ?",
+                    arrayOf(subjectCode, limit.toString()),
+                ).mapRows {
+                    TaskItem(
+                        id = it.longOf("id"),
+                        subjectCode = it.stringOf("subject_code"),
+                        topicCode = it.stringOf("topic_code"),
+                        type = it.stringOf("type"),
+                        prompt = it.stringOf("prompt"),
+                        answer = it.stringOf("answer"),
+                        solution = it.stringOf("solution"),
+                        maxPoints = it.intOf("max_points"),
+                        trusted = it.intOf("trusted") == 1,
+                        origin = it.stringOf("origin"),
+                        rubric = runCatching { it.stringOf("rubric") }.getOrDefault(""),
+                    )
+                }
+            }
+        }
+
+    /**
+     * Пробник не трогает topic_mastery: это отдельный экзаменационный замер
+     * поверх школьной программы, а не тренировка тем.
+     */
+    suspend fun saveExam(
+        profileId: Long,
+        subjectCode: String,
+        durationS: Int,
+        answers: List<Pair<TaskItem, Boolean>>,
+    ): Long = withContext(Dispatchers.IO) {
+        db.write { database ->
+            database.insert(
+                "exam_results",
+                null,
+                ContentValues().apply {
+                    put("profile_id", profileId)
+                    put("subject_code", subjectCode)
+                    put("created_at", System.currentTimeMillis())
+                    put("duration_s", durationS)
+                    put("total", answers.size)
+                    put("correct", answers.count { it.second })
+                },
+            )
+        }
+    }
+
+    suspend fun examResults(profileId: Long): List<ExamResult> = withContext(Dispatchers.IO) {
+        db.read { database ->
+            database.rawQuery(
+                "SELECT id, subject_code, created_at, duration_s, total, correct FROM exam_results " +
+                    "WHERE profile_id = ? ORDER BY created_at DESC LIMIT 30",
+                arrayOf(profileId.toString()),
+            ).mapRows {
+                ExamResult(
+                    id = it.longOf("id"),
+                    subjectCode = it.stringOf("subject_code"),
+                    createdAt = it.longOf("created_at"),
+                    durationS = it.intOf("duration_s"),
+                    total = it.intOf("total"),
+                    correct = it.intOf("correct"),
+                )
+            }
+        }
+    }
+
     suspend fun attemptsCount(profileId: Long): Int = withContext(Dispatchers.IO) {
         db.read { database ->
             database.rawQuery(

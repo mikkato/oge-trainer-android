@@ -13,6 +13,20 @@ class OgeDatabase(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // v7 (13.11.2026): пробники ОГЭ — отдельный экзаменационный трек.
+        if (oldVersion < 7) {
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS exam_results (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    profile_id INTEGER NOT NULL,
+                    subject_code TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    duration_s INTEGER NOT NULL DEFAULT 0,
+                    total INTEGER NOT NULL DEFAULT 0,
+                    correct INTEGER NOT NULL DEFAULT 0
+                )""",
+            )
+        }
         // v2 (13.11.2026): встроенный администратор + сброс пользовательской базы.
         // Столбец builtin добавляется, профили и все их данные удаляются; встроенный
         // администратор создаётся репозиторием при первом обращении (ProfilesRepository).

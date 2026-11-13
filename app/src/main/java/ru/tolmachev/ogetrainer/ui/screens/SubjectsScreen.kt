@@ -50,12 +50,17 @@ private val SUBJECT_ICON = mapOf(
 fun SubjectsScreen(
     profile: Profile,
     onOpenSubject: (SubjectStat) -> Unit,
+    onOpenExam: () -> Unit,
     onMenu: () -> Unit,
 ) {
     val colors = LocalOgeColors.current
     var stats by remember { mutableStateOf<List<SubjectStat>>(emptyList()) }
+    var examMode by remember { mutableStateOf(false) }
 
-    LaunchedEffect(profile.id) { stats = Graph.study.subjectStats(profile.id) }
+    LaunchedEffect(profile.id) {
+        stats = Graph.study.subjectStats(profile.id)
+        examMode = runCatching { Graph.profiles.programOf(profile.id)?.second == "oge" }.getOrDefault(false)
+    }
 
     Column(Modifier.fillMaxSize()) {
         TopBar(
@@ -77,6 +82,23 @@ fun SubjectsScreen(
                         color = colors.muted,
                         modifier = Modifier.padding(top = Space.x4),
                     )
+                }
+            }
+            if (examMode) {
+                item {
+                    Card(modifier = Modifier.clickable { onOpenExam() }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Space.x0_5)) {
+                                Text("Пробник ОГЭ", style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    "Случайный вариант из банка ФИПИ с таймером — отдельный экзамен",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = colors.muted,
+                                )
+                            }
+                            Text("→", color = OgeColors.Accent, style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
                 }
             }
             items(stats, key = { it.code }) { stat -> SubjectCard(stat) { onOpenSubject(stat) } }

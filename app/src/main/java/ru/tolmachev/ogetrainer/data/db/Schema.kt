@@ -7,7 +7,7 @@ package ru.tolmachev.ogetrainer.data.db
  */
 object Schema {
     const val DB_NAME = "oge.db"
-    const val VERSION = 6
+    const val VERSION = 7
 
     val CREATE = listOf(
         """
@@ -120,6 +120,18 @@ object Schema {
             tasks_done INTEGER NOT NULL DEFAULT 0,
             score REAL NOT NULL DEFAULT 0,
             sections_json TEXT NOT NULL DEFAULT '[]'
+        )
+        """,
+        // v7: пробники ОГЭ — отдельный экзаменационный трек, вне школьного освоения тем.
+        """
+        CREATE TABLE IF NOT EXISTS exam_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile_id INTEGER NOT NULL,
+            subject_code TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            duration_s INTEGER NOT NULL DEFAULT 0,
+            total INTEGER NOT NULL DEFAULT 0,
+            correct INTEGER NOT NULL DEFAULT 0
         )
         """,
         "CREATE INDEX IF NOT EXISTS idx_attempts_pending ON attempts(profile_id, status)",

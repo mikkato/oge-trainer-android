@@ -32,6 +32,7 @@ import ru.tolmachev.ogetrainer.ui.screens.LoginScreen
 import ru.tolmachev.ogetrainer.ui.screens.ProfileEditorScreen
 import ru.tolmachev.ogetrainer.ui.screens.BankScreen
 import ru.tolmachev.ogetrainer.ui.screens.DiagnosticsScreen
+import ru.tolmachev.ogetrainer.ui.screens.ExamScreen
 import ru.tolmachev.ogetrainer.ui.screens.HelpScreen
 import ru.tolmachev.ogetrainer.ui.screens.ReviewScreen
 import ru.tolmachev.ogetrainer.ui.screens.ModelsScreen
@@ -59,6 +60,8 @@ private sealed interface Route {
     data object Review : Route
     /** Диагностический срез для конкретного ученика. */
     data class Diagnostics(val profile: Profile) : Route
+    /** Пробник ОГЭ — отдельный экзаменационный трек. fromAdmin — откуда возвращаться. */
+    data class Exam(val profile: Profile, val fromAdmin: Boolean) : Route
 }
 
 private val ROLE_LABEL = mapOf("student" to "Ученик", "parent" to "Родитель", "admin" to "Администратор")
@@ -85,7 +88,7 @@ fun OgeRoot() {
     // На новом экране первый жест «назад» снова показывает меню.
     LaunchedEffect(route) { menuHintShown = false }
 
-    fun goUp(): Boolean = when (route) {
+    fun goUp(): Boolean { val r = route; return when (r) {
         is Route.Topic -> {
             route = Route.Subjects
             true
@@ -126,8 +129,12 @@ fun OgeRoot() {
             route = Route.Admin
             true
         }
+        is Route.Exam -> {
+            route = if (r.fromAdmin) Route.Admin else Route.Subjects
+            true
+        }
         Route.Subjects -> false
-    }
+    } }
 
     /**
      * Иерархия жеста «назад» с правого края (и системной кнопки):
@@ -197,6 +204,7 @@ fun OgeRoot() {
                     Route.Subjects -> SubjectsScreen(
                         profile = current,
                         onOpenSubject = { route = Route.Topic(it) },
+                        onOpenExam = { route = Route.Exam(current, fromAdmin = false) },
                         onMenu = { menuOpen = true },
                     )
 
@@ -218,6 +226,7 @@ fun OgeRoot() {
                         onOpenModels = { route = Route.Models },
                         onOpenBank = { route = Route.Bank },
                         onStartDiagnostics = { route = Route.Diagnostics(it) },
+                        onStartExam = { route = Route.Exam(it, fromAdmin = true) },
                     )
 
                     Route.Provider -> ProviderScreen(onBack = { route = Route.Admin })
@@ -229,6 +238,11 @@ fun OgeRoot() {
                     is Route.Diagnostics -> DiagnosticsScreen(
                         profile = r.profile,
                         onFinish = { route = Route.Admin },
+                    )
+
+                    is Route.Exam -> ExamScreen(
+                        profile = r.profile,
+                        onBack = { route = if (r.fromAdmin) Route.Admin else Route.Subjects },
                     )
 
                     Route.Help -> HelpScreen(
