@@ -1,0 +1,34 @@
+{
+ "version": 2,
+ "source": "oge-trainer 0.4.0, app.db",
+ "exported_at": "2026-11-13",
+ "counts": {
+  "subjects": 5,
+  "topics": 103,
+  "theories": 103,
+  "tasks": 407,
+  "programs": 2,
+  "users": 4,
+  "attempts": 5,
+  "mastery": 4,
+  "illustrations": 69,
+  "backgrounds": 6
+ },
+ "topics_without_theory": [],
+ "tasks_per_type": {
+  "extended": 81,
+  "izlozhenie": 4,
+  "short": 317,
+  "sochinenie": 5
+ },
+ "sha256": {
+  "subjects.json": "a151df8815d135d036e92527cc276b76415b3c787cecada7f2b59284cec7421e",
+  "topics.json": "bbbdbba41e501db47b5166627e98e6feebf90cdb62c91c785355b101daf50cfd",
+  "theories.json": "c27bd4c27d8210eb4496c75689e14f7a2c98e168b26281695cabcc26500e1f1d",
+  "tasks.json": "c0a2975fc00c57d91ae1ab65cef005fb490af875377cf7d82f9ea04d439e9513",
+  "programs.json": "199e8d1b1a5785719046d211c3c49b3e349ff0131fdaa4bb733d0c2dc6dbf1bb",
+  "users.json": "d25327d8319111a26ffefaef0f0aaadcf870001b6db6fd0af925870a9fc46109",
+  "attempts-archive.json": "3a88157c0042e675a1d9c61773d27366ce439d9e7128c9db70de66f87f90affe",
+  "mastery-archive.json": "75547d71512af65327dc73342c7f4b84c6e5522500db2b7bbc5522bb16e1a564"
+ }
+}

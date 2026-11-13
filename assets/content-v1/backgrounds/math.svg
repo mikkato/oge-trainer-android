@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1115"/>
+      <stop offset="1" stop-color="#14202e"/>
+    </linearGradient>
+    <filter id="b" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g filter="url(#b)">
+<text x="1229" y="456" font-size="66" fill="#5b7a9e" opacity="0.08" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-32 1229 456)">x² + y² = r²</text>
+<text x="481" y="908" font-size="33" fill="#5b7a9e" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-5 481 908)">∫₀¹ x dx</text>
+<text x="79" y="712" font-size="47" fill="#6b7280" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-6 79 712)">√(a² + b²) = c</text>
+<text x="665" y="683" font-size="77" fill="#6b7280" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-19 665 683)">S = πr²</text>
+<text x="279" y="915" font-size="51" fill="#626b8a" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(19 279 915)">Σᵢ₌₁ⁿ i = n(n+1)/2</text>
+<text x="1079" y="574" font-size="44" fill="#557a8a" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(30 1079 574)">sin²α + cos²α = 1</text>
+<text x="597" y="274" font-size="22" fill="#4f7d8f" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-19 597 274)">D = b² − 4ac</text>
+<text x="832" y="944" font-size="33" fill="#557a8a" opacity="0.15" font-family="Georgia, 'Times New Roman', serif" transform="rotate(20 832 944)">x = (−b ± √D) / 2a</text>
+<text x="1029" y="931" font-size="40" fill="#6b7280" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-12 1029 931)">logₐ(mn) = logₐm + logₐn</text>
+<text x="449" y="628" font-size="35" fill="#626b8a" opacity="0.13" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-7 449 628)">y = kx + b</text>
+<text x="1168" y="314" font-size="73" fill="#5a6f9e" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(13 1168 314)">e^(iπ) + 1 = 0</text>
+<text x="1403" y="47" font-size="33" fill="#6a6f9e" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-32 1403 47)">f′(x) = lim Δy/Δx</text>
+<text x="335" y="501" font-size="69" fill="#5f7d7a" opacity="0.18" font-family="Georgia, 'Times New Roman', serif" transform="rotate(9 335 501)">P(A|B) = P(A∩B)/P(B)</text>
+<text x="1066" y="69" font-size="77" fill="#7a6f9e" opacity="0.18" font-family="Georgia, 'Times New Roman', serif" transform="rotate(21 1066 69)">C(n,k) = n!/(k!(n−k)!)</text>
+<text x="188" y="570" font-size="37" fill="#626b8a" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(9 188 570)">aⁿ · aᵐ = aⁿ⁺ᵐ</text>
+<text x="461" y="927" font-size="24" fill="#4e6d8f" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(17 461 927)">∞</text>
+<text x="784" y="863" font-size="82" fill="#4e6d8f" opacity="0.12" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-29 784 863)">∑</text>
+<text x="115" y="711" font-size="36" fill="#626b8a" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(17 115 711)">∏</text>
+<text x="1346" y="898" font-size="53" fill="#5a6f9e" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(23 1346 898)">∂f/∂x</text>
+<text x="415" y="915" font-size="51" fill="#4f7d8f" opacity="0.1" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-9 415 915)">Δ</text>
+<text x="1260" y="885" font-size="41" fill="#6b7280" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(10 1260 885)">√2 ≈ 1.414</text>
+<text x="919" y="180" font-size="78" fill="#5a6f9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-3 919 180)">π ≈ 3.14159</text>
+<text x="773" y="141" font-size="48" fill="#5b7a9e" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(4 773 141)">∠A + ∠B + ∠C = 180°</text>
+<text x="1079" y="465" font-size="83" fill="#4e6d8f" opacity="0.17" font-family="Georgia, 'Times New Roman', serif" transform="rotate(30 1079 465)">a ∥ b, c ⊥ d</text>
+<text x="347" y="224" font-size="43" fill="#6b7280" opacity="0.16" font-family="Georgia, 'Times New Roman', serif" transform="rotate(14 347 224)">V = abc</text>
+<text x="120" y="527" font-size="84" fill="#5f7d7a" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(10 120 527)">φ = (1+√5)/2</text>
+<text x="1195" y="162" font-size="26" fill="#4e6d8f" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-25 1195 162)">y = ax² + bx + c</text>
+<text x="1426" y="480" font-size="64" fill="#5b7a9e" opacity="0.09" font-family="Georgia, 'Times New Roman', serif" transform="rotate(8 1426 480)">lim x→0 sin x / x = 1</text>
+<text x="591" y="408" font-size="80" fill="#4f7d8f" opacity="0.11" font-family="Georgia, 'Times New Roman', serif" transform="rotate(-15 591 408)">S = ½·a·h</text>
+<text x="1262" y="150" font-size="25" fill="#6a6f9e" opacity="0.14" font-family="Georgia, 'Times New Roman', serif" transform="rotate(31 1262 150)">cos2α = cos²α − sin²α</text>
+  </g>
+</svg>

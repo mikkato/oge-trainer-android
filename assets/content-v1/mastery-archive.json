@@ -1,0 +1,30 @@
+[
+ {
+  "username": "ivan",
+  "topic": "geo.russia.6",
+  "mastery": 0.0,
+  "attempts_count": 1,
+  "last_attempt_at": "2026-08-24 12:54:46.978870"
+ },
+ {
+  "username": "ivan",
+  "topic": "math.num",
+  "mastery": 0.0,
+  "attempts_count": 1,
+  "last_attempt_at": "2026-08-24 08:55:47.881678"
+ },
+ {
+  "username": "ivan",
+  "topic": "math.eq.1",
+  "mastery": 0.0,
+  "attempts_count": 1,
+  "last_attempt_at": "2026-08-24 17:47:50.593359"
+ },
+ {
+  "username": "ivan",
+  "topic": "math.eq.2",
+  "mastery": 0.21,
+  "attempts_count": 2,
+  "last_attempt_at": "2026-09-05 07:37:13.757545"
+ }
+]

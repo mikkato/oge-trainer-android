@@ -1,0 +1,28 @@
+# секреты и локальные артефакты
+.secrets/
+*.key
+*.jks
+*.keystore
+local.properties
+
+# сборка Android
+.gradle/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE и ОС
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# прочее
+*.log
+*.tmp

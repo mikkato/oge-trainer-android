@@ -1,0 +1,26 @@
+[
+ {
+  "id": 2,
+  "username": "vasilisa",
+  "full_name": "Василиса",
+  "role": "student"
+ },
+ {
+  "id": 3,
+  "username": "parent",
+  "full_name": "Михаил",
+  "role": "parent"
+ },
+ {
+  "id": 4,
+  "username": "admin",
+  "full_name": "Администратор",
+  "role": "admin"
+ },
+ {
+  "id": 5,
+  "username": "ivan",
+  "full_name": "Иван",
+  "role": "student"
+ }
+]

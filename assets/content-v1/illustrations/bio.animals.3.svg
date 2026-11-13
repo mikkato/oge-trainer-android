@@ -1,0 +1,16 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<ellipse cx="320" cy="190" rx="130" ry="70" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2.5"/>
+<circle cx="215" cy="175" r="8" fill="#ff6b5c"/>
+<path d="M 440 185 Q 470 165 490 190 Q 470 215 440 195 Z" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 250 130 L 220 70 L 270 90 Z" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 300 250 L 290 300 L 330 300 L 320 250 Z" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 360 250 L 350 300 L 390 300 L 380 250 Z" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 200 210 Q 240 240 280 220" fill="none" stroke="#e6e8ec" stroke-width="1.5"/>
+<path d="M 190 240 Q 250 270 310 250" fill="none" stroke="#e6e8ec" stroke-width="1.5"/>
+<text x="450" y="250" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">хвост</text>
+<text x="120" y="110" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">спинной плавник</text>
+<text x="120" y="310" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">брюшные плавники</text>
+<text x="80" y="180" fill="#ff6b5c" font-size="17" font-family="Arial, sans-serif">глаз</text>
+<text x="470" y="70" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">жаберная крышка</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<circle cx="270" cy="160" r="110" fill="#4a90d9" opacity="0.35"/>
+<circle cx="370" cy="160" r="110" fill="#e6a13c" opacity="0.35"/>
+<circle cx="320" cy="230" r="110" fill="#7ce38b" opacity="0.35"/>
+<circle cx="320" cy="170" r="50" fill="none" stroke="#ff6b5c" stroke-width="2.5"/>
+<text x="180" y="150" fill="#4a90d9" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">гидросфера</text>
+<text x="460" y="150" fill="#e6a13c" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">атмосфера</text>
+<text x="320" y="340" fill="#7ce38b" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">литосфера</text>
+<text x="320" y="172" fill="#ff6b5c" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">биосфера</text>
+<text x="320" y="40" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">биосфера — область пересечения оболочек Земли</text>
+</svg>

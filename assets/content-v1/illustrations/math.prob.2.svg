@@ -1,0 +1,14 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<line x1="80" y1="180" x2="560" y2="180" stroke="#e6e8ec" stroke-width="3"/>
+<circle cx="80" cy="180" r="7" fill="#ff6b5c"/>
+<circle cx="320" cy="180" r="7" fill="#e6a13c"/>
+<circle cx="560" cy="180" r="7" fill="#7ce38b"/>
+<text x="80" y="150" fill="#e6e8ec" font-size="19" font-family="Arial, sans-serif" text-anchor="middle">0</text>
+<text x="80" y="210" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">невозможное</text>
+<text x="320" y="150" fill="#e6e8ec" font-size="19" font-family="Arial, sans-serif" text-anchor="middle">0,5</text>
+<text x="320" y="210" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">равновероятное</text>
+<text x="560" y="150" fill="#e6e8ec" font-size="19" font-family="Arial, sans-serif" text-anchor="middle">1</text>
+<text x="560" y="210" fill="#aeb8c6" font-size="15" font-family="Arial, sans-serif" text-anchor="middle">достоверное</text>
+<text x="320" y="290" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">0 ≤ P(A) ≤ 1</text>
+</svg>

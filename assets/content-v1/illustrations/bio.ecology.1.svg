@@ -1,0 +1,22 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<rect x="40" y="40" width="270" height="120" rx="8" fill="#1f2a3a" stroke="#4a90d9" stroke-width="2"/>
+<path d="M 60 120 Q 80 90 100 120 T 140 120 T 180 120 T 220 120 T 260 120" fill="none" stroke="#4a90d9" stroke-width="2"/>
+<path d="M 120 140 Q 140 110 160 140 T 200 140" fill="none" stroke="#4a90d9" stroke-width="2"/>
+<text x="175" y="95" fill="#4a90d9" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">водная</text>
+<rect x="330" y="40" width="270" height="120" rx="8" fill="#1f2a3a" stroke="#7ce38b" stroke-width="2"/>
+<circle cx="400" cy="90" r="14" fill="#7ce38b"/>
+<path d="M 450 110 L 470 60 L 490 110" fill="none" stroke="#7ce38b" stroke-width="2"/>
+<text x="465" y="140" fill="#7ce38b" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">наземно-воздушная</text>
+<rect x="40" y="180" width="270" height="120" rx="8" fill="#1f2a3a" stroke="#e6a13c" stroke-width="2"/>
+<line x1="40" y1="260" x2="310" y2="260" stroke="#e6a13c" stroke-width="2"/>
+<line x1="40" y1="230" x2="310" y2="230" stroke="#e6a13c" stroke-width="1"/>
+<path d="M 130 255 Q 150 250 170 255 Q 190 260 210 255" fill="none" stroke="#ff6b5c" stroke-width="2"/>
+<text x="175" y="215" fill="#e6a13c" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">почвенная</text>
+<rect x="330" y="180" width="270" height="120" rx="8" fill="#1f2a3a" stroke="#c08ce6" stroke-width="2"/>
+<path d="M 400 300 Q 430 240 465 270" fill="none" stroke="#c08ce6" stroke-width="3"/>
+<circle cx="400" cy="300" r="6" fill="#c08ce6"/>
+<circle cx="465" cy="270" r="6" fill="#c08ce6"/>
+<text x="465" y="220" fill="#c08ce6" font-size="18" font-family="Arial, sans-serif" text-anchor="middle">организменная</text>
+<text x="320" y="335" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">среды обитания организмов</text>
+</svg>

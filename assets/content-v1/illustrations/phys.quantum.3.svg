@@ -1,0 +1,20 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<circle cx="150" cy="180" r="40" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2.5"/>
+<circle cx="143" cy="173" r="10" fill="#ff6b5c"/>
+<circle cx="160" cy="188" r="10" fill="#e6a13c"/>
+<line x1="190" y1="180" x2="260" y2="180" stroke="#e6e8ec" stroke-width="2" marker-end="url(#h)"/>
+<circle cx="330" cy="135" r="26" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<text x="330" y="141" fill="#e6e8ec" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">Xe</text>
+<circle cx="330" cy="225" r="26" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<text x="330" y="231" fill="#e6e8ec" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">Sr</text>
+<circle cx="410" cy="150" r="7" fill="#7c9ce6"/>
+<circle cx="420" cy="200" r="7" fill="#7c9ce6"/>
+<circle cx="405" cy="235" r="7" fill="#7c9ce6"/>
+<line x1="330" y1="135" x2="403" y2="153" stroke="#7c9ce6" stroke-width="1.5"/>
+<line x1="330" y1="225" x2="413" y2="203" stroke="#7c9ce6" stroke-width="1.5"/>
+<line x1="330" y1="225" x2="398" y2="232" stroke="#7c9ce6" stroke-width="1.5"/>
+<text x="80" y="120" fill="#e6e8ec" font-size="19" font-family="Arial, sans-serif">деление ядра</text>
+<text x="470" y="300" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">осколки + нейтроны</text>
+<defs><marker id="h" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e6e8ec"/></marker></defs>
+</svg>

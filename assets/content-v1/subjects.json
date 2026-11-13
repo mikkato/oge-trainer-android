@@ -1,0 +1,32 @@
+[
+ {
+  "id": 1,
+  "code": "math",
+  "title": "Математика",
+  "description": ""
+ },
+ {
+  "id": 2,
+  "code": "rus",
+  "title": "Русский язык",
+  "description": ""
+ },
+ {
+  "id": 3,
+  "code": "physics",
+  "title": "Физика",
+  "description": ""
+ },
+ {
+  "id": 4,
+  "code": "geography",
+  "title": "География",
+  "description": ""
+ },
+ {
+  "id": 5,
+  "code": "biology",
+  "title": "Биология",
+  "description": ""
+ }
+]

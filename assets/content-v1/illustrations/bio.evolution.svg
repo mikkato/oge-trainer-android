@@ -1,0 +1,16 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<line x1="320" y1="50" x2="320" y2="290" stroke="#e6e8ec" stroke-width="3"/>
+<path d="M 320 90 L 220 130 L 220 170" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 320 90 L 420 130 L 420 170" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 220 170 L 160 210" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 220 170 L 260 210" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 420 170 L 380 210" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<path d="M 420 170 L 480 210" fill="none" stroke="#e6e8ec" stroke-width="2"/>
+<circle cx="160" cy="218" r="8" fill="#ff6b5c"/>
+<circle cx="260" cy="218" r="8" fill="#e6a13c"/>
+<circle cx="380" cy="218" r="8" fill="#7c9ce6"/>
+<circle cx="480" cy="218" r="8" fill="#7ce38b"/>
+<text x="320" y="320" fill="#aeb8c6" font-size="16" font-family="Arial, sans-serif" text-anchor="middle">общий предок → расхождение видов</text>
+<text x="320" y="38" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">филогенетическое дерево</text>
+</svg>

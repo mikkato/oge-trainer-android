@@ -1,0 +1,23 @@
+[
+ {
+  "username": "vasilisa",
+  "type": "school",
+  "grade": 6,
+  "subjects": [
+   "math",
+   "rus"
+  ]
+ },
+ {
+  "username": "ivan",
+  "type": "oge",
+  "grade": 9,
+  "subjects": [
+   "biology",
+   "geography",
+   "math",
+   "physics",
+   "rus"
+  ]
+ }
+]

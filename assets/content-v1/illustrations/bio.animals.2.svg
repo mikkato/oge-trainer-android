@@ -1,0 +1,24 @@
+<svg viewBox="0 0 640 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="#161920"/>
+<line x1="200" y1="170" x2="250" y2="150" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="200" y1="170" x2="250" y2="190" stroke="#e6e8ec" stroke-width="2"/>
+<circle cx="200" cy="170" r="20" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<circle cx="192" cy="165" r="3" fill="#ff6b5c"/>
+<circle cx="208" cy="165" r="3" fill="#ff6b5c"/>
+<ellipse cx="270" cy="170" rx="30" ry="24" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<ellipse cx="360" cy="170" rx="40" ry="30" fill="#1f2a3a" stroke="#e6e8ec" stroke-width="2"/>
+<ellipse cx="290" cy="130" rx="22" ry="12" fill="none" stroke="#e6e8ec" stroke-width="1.5"/>
+<ellipse cx="330" cy="130" rx="22" ry="12" fill="none" stroke="#e6e8ec" stroke-width="1.5"/>
+<line x1="258" y1="190" x2="245" y2="225" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="275" y1="192" x2="270" y2="228" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="300" y1="196" x2="300" y2="232" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="335" y1="196" x2="340" y2="232" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="355" y1="195" x2="365" y2="230" stroke="#e6e8ec" stroke-width="2"/>
+<line x1="380" y1="190" x2="395" y2="225" stroke="#e6e8ec" stroke-width="2"/>
+<text x="200" y="270" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">голова</text>
+<text x="270" y="270" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">грудь</text>
+<text x="360" y="270" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif" text-anchor="middle">брюшко</text>
+<text x="520" y="140" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">6 ног</text>
+<text x="520" y="170" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">усики</text>
+<text x="520" y="200" fill="#e6e8ec" font-size="17" font-family="Arial, sans-serif">крылья</text>
+</svg>
