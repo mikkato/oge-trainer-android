@@ -472,8 +472,9 @@ private fun BankGenerateDialog(
     }
 
     val localSupported = remember(topic.code) {
-        // Шаблоны покрывают вычислимые темы: проверяем по названию.
-        ru.tolmachev.ogetrainer.data.provider.LocalTemplates.supports("math", topic.title) ||
+        // Шаблоны покрывают вычислимые темы: проверяем по коду и названию.
+        ru.tolmachev.ogetrainer.data.provider.LocalTemplates.supports("rus", topic.title, topic.code) ||
+            ru.tolmachev.ogetrainer.data.provider.LocalTemplates.supports("math", topic.title) ||
             ru.tolmachev.ogetrainer.data.provider.LocalTemplates.supports("phys", topic.title) ||
             ru.tolmachev.ogetrainer.data.provider.LocalTemplates.supports("chem", topic.title)
     }

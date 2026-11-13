@@ -16,8 +16,8 @@ class LocalGenerator(private val db: OgeDatabase) {
 
     data class Batch(val added: Int, val skipped: Int)
 
-    fun supports(subjectCode: String, topicTitle: String): Boolean =
-        LocalTemplates.supports(subjectCode, topicTitle)
+    fun supports(subjectCode: String, topicTitle: String, topicCode: String = ""): Boolean =
+        LocalTemplates.supports(subjectCode, topicTitle, topicCode)
 
     suspend fun generate(
         subjectCode: String,
@@ -26,7 +26,7 @@ class LocalGenerator(private val db: OgeDatabase) {
         grade: Int,
         count: Int,
     ): Result<Batch> = withContext(Dispatchers.IO) {
-        val drafts = LocalTemplates.drafts(subjectCode, topicTitle, count)
+        val drafts = LocalTemplates.drafts(subjectCode, topicTitle, count, topicCode = topicCode)
         if (drafts.isEmpty()) {
             return@withContext Result.failure(
                 IllegalStateException("Для этой темы локальная генерация недоступна — используйте банк или модель"),

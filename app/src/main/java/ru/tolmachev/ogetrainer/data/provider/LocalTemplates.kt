@@ -23,8 +23,8 @@ object LocalTemplates {
         val difficulty: Int,
     )
 
-    fun supports(subjectCode: String, topicTitle: String): Boolean =
-        familiesFor(subjectCode, topicTitle).isNotEmpty()
+    fun supports(subjectCode: String, topicTitle: String, topicCode: String = ""): Boolean =
+        familiesFor(subjectCode, topicTitle, topicCode).isNotEmpty()
 
     /** Готовые задания: числа подставляются случайно, ответ считается кодом. */
     fun drafts(
@@ -32,16 +32,22 @@ object LocalTemplates {
         topicTitle: String,
         count: Int,
         random: Random = Random.Default,
+        topicCode: String = "",
     ): List<Draft> {
-        val families = familiesFor(subjectCode, topicTitle)
+        val families = familiesFor(subjectCode, topicTitle, topicCode)
         if (families.isEmpty()) return emptyList()
         return List(count) { families[rnd.nextInt(families.size)].invoke() }
     }
 
-    /** Семейство заданий выбирается по названию темы, а не по предмету целиком. */
-    private fun familiesFor(subjectCode: String, topicTitle: String): List<() -> Draft> {
+    /** Семейство заданий выбирается по коду темы, а для старых мест вызова — по названию. */
+    private fun familiesFor(subjectCode: String, topicTitle: String, topicCode: String): List<() -> Draft> {
         val title = topicTitle.lowercase(Locale("ru"))
         val list = mutableListOf<() -> Draft>()
+
+        if (subjectCode.startsWith("rus")) {
+            list += RussianTemplates.familiesFor(topicCode, topicTitle)
+            return list
+        }
 
         if (subjectCode.startsWith("math")) {
             when {

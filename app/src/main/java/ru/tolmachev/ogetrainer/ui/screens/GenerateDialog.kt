@@ -83,7 +83,7 @@ fun GenerateDialog(
         val current = topic
         val code = subject
         localSupported = current != null && code != null &&
-            Graph.localGenerator.supports(code, current.second)
+            Graph.localGenerator.supports(code, current.second, current.first)
         if (!localSupported && providerReady) mode = "Моделью"
     }
 
